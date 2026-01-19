@@ -29,11 +29,7 @@ export default defineConfig({
     minify: 'terser',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-vue': ['vue', 'vue-router', 'pinia'],
-          'vendor-animations': ['gsap', '@vueuse/motion', 'lenis'],
-          'vendor-utils': ['axios', '@vueuse/core'],
-        },
+        // manualChunks removed to fix _export_sfc error
       },
     },
   },
