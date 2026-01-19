@@ -1,0 +1,294 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark: #0A0A0A;
+  --color-dark-50: #1A1A1A;
+  --color-dark-100: #141414;
+  --color-dark-200: #0F0F0F;
+  --color-dark-300: #0A0A0A;
+  --color-dark-400: #050505;
+
+  --color-gold: #D4AF37;
+  --color-gold-50: #F9F4E8;
+  --color-gold-100: #F3E9D1;
+  --color-gold-200: #EBD8A3;
+  --color-gold-300: #E3C775;
+  --color-gold-400: #DBB647;
+  --color-gold-500: #D4AF37;
+  --color-gold-600: #B8962C;
+  --color-gold-700: #8A7021;
+  --color-gold-800: #5C4A16;
+  --color-gold-900: #2E250B;
+
+  --font-family-display: 'Playfair Display', serif;
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-heading: 'Montserrat', sans-serif;
+}
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-dark);
+    color: white;
+    font-family: var(--font-family-sans);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-500);
+    color: var(--color-dark);
+  }
+}
+
+@layer components {
+  /* Premium Button Styles */
+  .btn-primary {
+    position: relative;
+    padding: 1rem 2rem;
+    background-color: var(--color-gold-500);
+    color: var(--color-dark);
+    font-family: var(--font-family-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-gold-400);
+    box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.5);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: translateX(-200%);
+    transition: transform 0.7s;
+  }
+
+  .btn-primary:hover::before {
+    transform: translateX(200%);
+  }
+
+  .btn-secondary {
+    position: relative;
+    padding: 1rem 2rem;
+    border: 2px solid var(--color-gold-500);
+    color: var(--color-gold-500);
+    font-family: var(--font-family-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-gold-500);
+    color: var(--color-dark);
+    box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.3);
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-ghost {
+    position: relative;
+    padding: 1rem 2rem;
+    color: white;
+    font-family: var(--font-family-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--color-gold-500);
+    color: var(--color-gold-500);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .btn-ghost:active {
+    transform: scale(0.95);
+  }
+
+  /* Card Styles */
+  .card-premium {
+    background-color: var(--color-dark-50);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    transition: all 0.5s;
+  }
+
+  .card-premium:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.2);
+  }
+
+  /* Text Gradient */
+  .text-gradient {
+    background: linear-gradient(to right, var(--color-gold-300), var(--color-gold-500), var(--color-gold-300));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glass Effect */
+  .glass {
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s ease-in-out;
+  }
+}
+
+@layer utilities {
+  /* Custom font families */
+  .font-heading {
+    font-family: var(--font-family-heading);
+  }
+
+  .font-display {
+    font-family: var(--font-family-display);
+  }
+
+  .font-sans {
+    font-family: var(--font-family-sans);
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gold.500') theme('colors.dark.100');
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background-color: var(--color-dark-100);
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: var(--color-gold-500);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-gold-400);
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Premium gradient backgrounds */
+  .bg-premium-dark {
+    background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0F0F0F 100%);
+  }
+
+  .bg-premium-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #F9F4E8 50%, #D4AF37 100%);
+  }
+
+  /* Text shadows for premium look */
+  .text-shadow-gold {
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5),
+                 0 0 40px rgba(212, 175, 55, 0.3);
+  }
+
+  /* Container with max width */
+  .container-custom {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-custom {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-custom {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* Section spacing */
+  .section-padding {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+
+  @media (min-width: 768px) {
+    .section-padding {
+      padding-top: 8rem;
+      padding-bottom: 8rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding-top: 10rem;
+      padding-bottom: 10rem;
+    }
+  }
+
+  /* Display text sizes */
+  .text-display-xl {
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .text-display-lg {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .text-display-md {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+}
+
