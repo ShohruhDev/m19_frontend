@@ -101,7 +101,7 @@ const staffMembers = MASTERS.map(master => ({
   specializations: [master.specialization],
 }))
 
-const bookWithMaster = (master: any) => {
+const bookWithMaster = (_master: any) => {
   isBookingOpen.value = true
 }
 </script>

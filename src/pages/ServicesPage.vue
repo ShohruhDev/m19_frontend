@@ -81,7 +81,7 @@ const serviceCategories = SERVICES.map(category => ({
   })),
 }))
 
-const bookService = (service: any) => {
+const bookService = (_service: any) => {
   isBookingOpen.value = true
 }
 </script>

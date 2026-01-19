@@ -8,7 +8,6 @@ import { ref, computed } from 'vue'
 import { altegService } from '@/services'
 import type {
   BookingStep,
-  BookingState,
   AltegService,
   AltegStaff,
   AltegScheduleSlot,
