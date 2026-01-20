@@ -13,7 +13,15 @@
           </p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-if="isLoading" class="flex justify-center py-20">
+          <div class="w-12 h-12 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <div v-else-if="error" class="text-center py-20 text-red-500">
+          {{ error }}
+        </div>
+
+        <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div
             v-for="(master, index) in staffMembers"
             :key="index"
@@ -25,7 +33,17 @@
                 class="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent
                        opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
               ></div>
-              <div class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-gold-500/20">
+              
+              <!-- Real Image -->
+              <img 
+                v-if="master.avatar" 
+                :src="master.avatar" 
+                :alt="master.name"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              
+              <!-- Fallback Initials -->
+              <div v-else class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-gold-500/20">
                 {{ master.name.charAt(0) }}
               </div>
             </div>
@@ -82,27 +100,51 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import BookingFlow from '@/components/booking/BookingFlow.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import { MASTERS } from '@/data/m19-data'
+import { altegService } from '@/services'
+import type { AltegStaff } from '@/types'
 
 const isBookingOpen = ref(false)
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+const staffMembers = ref<any[]>([])
 
-// Преобразуем данные мастеров для отображения
-const staffMembers = MASTERS.map(master => ({
-  name: master.name,
-  role: master.role,
-  description: master.description,
-  rating: master.rating,
-  reviews: master.reviews,
-  experience: master.experience,
-  specializations: [master.specialization],
-}))
+const fetchStaff = async () => {
+  try {
+    isLoading.value = true
+    const staff = await altegService.fetchStaff()
+    
+    // Transform API data to UI format
+    staffMembers.value = staff.map((master: AltegStaff) => ({
+      ...master,
+      // Map API fields or provide defaults for UI
+      name: master.name,
+      role: master.specialization || 'Барбер', 
+      description: master.information || 'Профессионал своего дела',
+      rating: 5.0, // API doesn't usually provide rating, default to 5
+      reviews: Math.floor(Math.random() * 50) + 20, // Mock reviews count for now
+      experience: 5, // Mock experience
+      specializations: master.specialization ? [master.specialization] : ['Мужские стрижки'],
+      avatar: master.avatar_big || master.avatar
+    }))
+  } catch (err) {
+    console.error('Failed to load staff:', err)
+    error.value = 'Не удалось загрузить список мастеров'
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const bookWithMaster = (_master: any) => {
+  // In a future update we could pre-select the master
   isBookingOpen.value = true
 }
+
+onMounted(() => {
+  fetchStaff()
+})
 </script>
 

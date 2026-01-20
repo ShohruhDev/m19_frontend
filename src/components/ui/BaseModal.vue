@@ -1,48 +1,52 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div
-        v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        @click="handleBackdropClick"
-      >
+      <div v-if="isOpen" class="relative z-[9999]">
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
+        <div 
+          class="fixed inset-0 bg-black/90 backdrop-blur-sm transition-opacity" 
+          @click="handleBackdropClick"
+        ></div>
 
-        <!-- Modal Content -->
-        <div
-          ref="modalRef"
-          :class="[
-            'relative bg-dark border border-white/10 max-h-[90vh] overflow-y-auto scrollbar-custom',
-            sizeClasses,
-          ]"
-          @click.stop
-        >
-          <!-- Close Button -->
-          <button
-            v-if="showClose"
-            class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center
-                   text-white/50 hover:text-gold-500 transition-colors duration-300"
-            @click="close"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <!-- Scrollable Container -->
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto scrollbar-custom overscroll-contain" @click.self="handleBackdropClick">
+          <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <!-- Modal Content -->
+            <div
+              ref="modalRef"
+              :class="[
+                'relative transform bg-dark border border-white/10 w-full text-left shadow-xl transition-all sm:my-8',
+                sizeClasses,
+              ]"
+              @click.stop
+            >
+              <!-- Close Button -->
+              <button
+                v-if="showClose"
+                class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center
+                       text-white/50 hover:text-gold-500 transition-colors duration-300"
+                @click="close"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
 
-          <!-- Header -->
-          <div v-if="$slots.header" class="p-8 border-b border-white/10">
-            <slot name="header"></slot>
-          </div>
+              <!-- Header -->
+              <div v-if="$slots.header" class="p-6 sm:p-8 border-b border-white/10">
+                <slot name="header"></slot>
+              </div>
 
-          <!-- Body -->
-          <div class="p-8">
-            <slot></slot>
-          </div>
+              <!-- Body -->
+              <div class="p-6 sm:p-8">
+                <slot></slot>
+              </div>
 
-          <!-- Footer -->
-          <div v-if="$slots.footer" class="p-8 border-t border-white/10">
-            <slot name="footer"></slot>
+              <!-- Footer -->
+              <div v-if="$slots.footer" class="p-6 sm:p-8 border-t border-white/10">
+                <slot name="footer"></slot>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -42,8 +42,8 @@
         <div class="flex items-start gap-4">
           <div class="relative">
             <img
-              v-if="member.avatar_url"
-              :src="member.avatar_url"
+              v-if="member.avatar_url || member.avatar || member.avatar_big"
+              :src="member.avatar_url || member.avatar_big || member.avatar"
               :alt="member.name"
               class="w-20 h-20 rounded-full object-cover border-2 border-gold-500/30"
             />

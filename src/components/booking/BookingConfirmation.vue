@@ -258,6 +258,7 @@ const formatPrice = (price: number) => {
     style: 'currency',
     currency: 'RUB',
     minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(price)
 }
 </script>

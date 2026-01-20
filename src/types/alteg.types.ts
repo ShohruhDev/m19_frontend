@@ -26,10 +26,13 @@ export interface AltegStaff {
   name: string
   specialization?: string
   avatar_url?: string
+  avatar?: string
+  avatar_big?: string
   rating?: number
   reviews_count?: number
   experience_years?: number
   description?: string
+  information?: string
   services?: number[] // ID услуг, которые выполняет
 }
 

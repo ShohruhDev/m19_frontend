@@ -25,10 +25,11 @@ class AltegIntegrationService {
    */
   async fetchServices(): Promise<AltegService[]> {
     try {
-      const data = await httpClient.get<{ services: AltegService[] }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/services`
       )
-      return data.services
+      // Backend returns { success: true, data: { success: true, data: [...], meta: ... } }
+      return response.data?.data || []
     } catch (error) {
       console.error('Error fetching services:', error)
       throw new Error('Не удалось загрузить список услуг')
@@ -40,10 +41,10 @@ class AltegIntegrationService {
    */
   async fetchServicesByCategory(): Promise<AltegServiceCategory[]> {
     try {
-      const data = await httpClient.get<{ categories: AltegServiceCategory[] }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/services/categories`
       )
-      return data.categories
+      return response.data?.data || []
     } catch (error) {
       console.error('Error fetching services by category:', error)
       throw new Error('Не удалось загрузить категории услуг')
@@ -55,10 +56,10 @@ class AltegIntegrationService {
    */
   async fetchServiceById(serviceId: number | string): Promise<AltegService> {
     try {
-      const data = await httpClient.get<{ service: AltegService }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/services/${serviceId}`
       )
-      return data.service
+      return response.data?.data
     } catch (error) {
       console.error('Error fetching service:', error)
       throw new Error('Не удалось загрузить информацию об услуге')
@@ -71,11 +72,11 @@ class AltegIntegrationService {
   async fetchStaff(serviceId?: number | string): Promise<AltegStaff[]> {
     try {
       const params = serviceId ? { service_id: serviceId } : {}
-      const data = await httpClient.get<{ staff: AltegStaff[] }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/staff`,
         { params }
       )
-      return data.staff
+      return response.data?.data || []
     } catch (error) {
       console.error('Error fetching staff:', error)
       throw new Error('Не удалось загрузить список мастеров')
@@ -87,10 +88,10 @@ class AltegIntegrationService {
    */
   async fetchStaffById(staffId: number | string): Promise<AltegStaff> {
     try {
-      const data = await httpClient.get<{ staff: AltegStaff }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/staff/${staffId}`
       )
-      return data.staff
+      return response.data?.data
     } catch (error) {
       console.error('Error fetching staff member:', error)
       throw new Error('Не удалось загрузить информацию о мастере')
@@ -115,11 +116,11 @@ class AltegIntegrationService {
         params.from_date = fromDate
       }
 
-      const data = await httpClient.get<{ dates: AltegAvailableDate[] }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/schedule/dates`,
         { params }
       )
-      return data.dates
+      return response.data?.data || []
     } catch (error) {
       console.error('Error fetching available dates:', error)
       throw new Error('Не удалось загрузить доступные даты')
@@ -135,7 +136,7 @@ class AltegIntegrationService {
     date: string
   ): Promise<AltegScheduleSlot[]> {
     try {
-      const data = await httpClient.get<{ slots: AltegScheduleSlot[] }>(
+      const response = await httpClient.get<any>(
         `${this.endpoint}/schedule/slots`,
         {
           params: {
@@ -145,7 +146,9 @@ class AltegIntegrationService {
           },
         }
       )
-      return data.slots.filter(slot => slot.available)
+      // Ensure we have an array before filtering
+      const slots = response.data?.data || []
+      return Array.isArray(slots) ? slots.filter((slot: any) => slot.available) : []
     } catch (error) {
       console.error('Error fetching available time:', error)
       throw new Error('Не удалось загрузить доступное время')
@@ -160,12 +163,12 @@ class AltegIntegrationService {
       // Валидация данных
       this.validateBookingPayload(payload)
 
-      const data = await httpClient.post<{ booking: AltegBookingResponse }>(
+      const response = await httpClient.post<any>(
         `${this.endpoint}/bookings`,
         payload
       )
 
-      return data.booking
+      return response.data?.data
     } catch (error) {
       console.error('Error creating booking:', error)
 
