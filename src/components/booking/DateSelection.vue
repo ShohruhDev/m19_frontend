@@ -18,8 +18,15 @@
       />
     </div>
 
-    <div v-if="!selectedDate" class="text-center text-muted-foreground text-sm">
-      Выберите дату для записи
+    <div v-if="!selectedDate" class="text-center text-muted-foreground text-sm flex flex-col items-center gap-2">
+      <p>Выберите дату для записи</p>
+      <Button 
+        variant="link" 
+        class="text-primary h-auto p-0"
+        @click="selectNearestDate"
+      >
+        Найти ближайшую свободную дату
+      </Button>
     </div>
   </div>
 </template>
@@ -29,6 +36,7 @@ import { ref, watch } from 'vue'
 import { useBookingFlow } from '@/composables'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
 import { Calendar } from '@/components/ui/calendar'
+import { Button } from '@/components/ui/button'
 import { DateValue, getLocalTimeZone, today, CalendarDate } from '@internationalized/date'
 
 const {
@@ -73,6 +81,17 @@ const isDateDisabled = (dateVal: DateValue) => {
   const found = availableDates.value.find(ad => ad.date === dateString)
   if (!found) return true // Disable if not in available list
   return found.slots_count === 0
+}
+
+const selectNearestDate = () => {
+  // Find first date with > 0 slots
+  // availableDates is usually sorted by API, but let's be safe or just take the first one
+  const sorted = [...availableDates.value].sort((a, b) => a.date.localeCompare(b.date))
+  const nearest = sorted.find(d => d.slots_count > 0)
+  
+  if (nearest) {
+    selectDateAction(nearest.date)
+  }
 }
 </script>
 

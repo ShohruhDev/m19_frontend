@@ -50,12 +50,26 @@
           </div>
           
           <h3 class="font-heading font-medium text-foreground">{{ member.name }}</h3>
-          <p class="text-xs text-muted-foreground mt-1">
+          <p class="text-xs text-muted-foreground mt-1 mb-2">
             {{ member.specialization || 'Барбер' }}
           </p>
-          <div class="flex items-center gap-1 mt-2 text-xs text-yellow-500">
+          <div class="flex items-center gap-1 mb-3 text-xs text-yellow-500">
              <span>★</span>
              <span>{{ member.rating || '5.0' }}</span>
+          </div>
+
+          <!-- Quick Availablity Chips -->
+          <div v-if="member.next_slots && member.next_slots.length > 0" class="w-full flex gap-1 overflow-x-auto pb-1 no-scrollbar justify-center">
+            <div 
+              v-for="slot in member.next_slots" 
+              :key="slot.datetime"
+              class="shrink-0 px-2 py-1 rounded bg-secondary text-[10px] text-secondary-foreground whitespace-nowrap border border-border/50"
+            >
+              {{ slot.time }}
+            </div>
+          </div>
+          <div v-else class="text-[10px] text-muted-foreground">
+             Нет свободных окон на ближайшее время
           </div>
         </SelectableCard>
       </div>

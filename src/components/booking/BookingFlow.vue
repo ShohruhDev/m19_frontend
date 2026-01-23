@@ -57,26 +57,11 @@
       </div>
 
       <!-- Footer Actions -->
-      <DialogFooter class="p-6 border-t border-border bg-muted/20 flex gap-3 sm:justify-between items-center w-full">
-        <Button
-          v-if="canGoBack && currentStep !== 'confirmation'"
-          variant="outline"
-          @click="prevStep"
-        >
-          Назад
-        </Button>
-        <div v-else class="flex-1"></div> <!-- Spacer -->
-
-        <Button
-          v-if="currentStep !== 'confirmation'"
-          variant="default"
-          :disabled="!canGoNext"
-          @click="nextStep"
-          class="flex-1 sm:flex-none sm:min-w-[120px]"
-        >
-          Далее
-        </Button>
-      </DialogFooter>
+      <!-- Footer Actions -->
+      <BookingSummaryFooter
+        @next="nextStep"
+        @back="prevStep"
+      />
     </DialogContent>
   </Dialog>
 
@@ -128,7 +113,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogDescription
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -137,6 +121,7 @@ import StaffSelection from './StaffSelection.vue'
 import DateSelection from './DateSelection.vue'
 import TimeSelection from './TimeSelection.vue'
 import BookingConfirmation from './BookingConfirmation.vue'
+import BookingSummaryFooter from './BookingSummaryFooter.vue'
 
 interface Props {
   isOpen: boolean
@@ -153,8 +138,6 @@ const {
   stepIndex,
   totalSteps,
   progress,
-  canGoNext,
-  canGoBack,
   stepConfig,
   error,
   bookingResult,

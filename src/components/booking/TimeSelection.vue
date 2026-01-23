@@ -10,26 +10,44 @@
       <p class="text-destructive">{{ error }}</p>
     </div>
 
-    <div v-else class="space-y-6 h-[400px] overflow-y-auto pr-2 scrollbar-custom">
+    <div v-else class="space-y-2 h-[400px] overflow-y-auto pr-2 scrollbar-custom">
       <!-- Временные слоты по времени суток -->
-      <div v-for="period in timePeriods" :key="period.name" class="space-y-3">
-        <h3 class="text-sm font-medium text-muted-foreground">{{ period.name }}</h3>
-
-        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          <Button
-            v-for="slot in period.slots"
-            :key="slot.datetime"
-            :variant="selectedTime?.datetime === slot.datetime ? 'default' : 'outline'"
-            class="w-full"
-            @click="selectTime(slot)"
-          >
-            {{ slot.time }}
-          </Button>
-        </div>
-      </div>
+      <Collapsible
+        v-for="period in timePeriods"
+        :key="period.name"
+        v-model:open="openStates[period.name]"
+        class="border border-border rounded-lg bg-card overflow-hidden"
+      >
+        <CollapsibleTrigger class="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-foreground">{{ period.name }}</span>
+            <span class="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              {{ period.slots.length }}
+            </span>
+          </div>
+          <ChevronDown
+            class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+            :class="{ 'rotate-180': openStates[period.name] }"
+          />
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <div class="p-4 pt-0 grid grid-cols-3 sm:grid-cols-4 gap-3">
+            <Button
+              v-for="slot in period.slots"
+              :key="slot.datetime"
+              :variant="selectedTime?.datetime === slot.datetime ? 'default' : 'outline'"
+              class="w-full"
+              @click="selectTime(slot)"
+            >
+              {{ slot.time }}
+            </Button>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <!-- Пустое состояние -->
-      <div v-if="availableSlots.length === 0" class="text-center py-12">
+      <div v-if="timePeriods.length === 0" class="text-center py-12">
         <p class="text-muted-foreground">Нет доступного времени на выбранную дату</p>
       </div>
     </div>
@@ -37,10 +55,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useBookingFlow } from '@/composables'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-vue-next'
 import type { AltegScheduleSlot } from '@/types'
 
 const {
@@ -54,6 +74,13 @@ const {
 const selectTime = (slot: AltegScheduleSlot) => {
   selectTimeAction(slot)
 }
+
+// State for open periods
+const openStates = ref<Record<string, boolean>>({
+  'Утро': true,
+  'День': true,
+  'Вечер': true
+})
 
 // Группировка слотов по времени суток
 const timePeriods = computed(() => {

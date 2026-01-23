@@ -69,9 +69,12 @@ class AltegIntegrationService {
   /**
    * Получить список сотрудников (барберов)
    */
-  async fetchStaff(serviceId?: number | string): Promise<AltegStaff[]> {
+  async fetchStaff(serviceId?: number | string, withSlots: boolean = false): Promise<AltegStaff[]> {
     try {
-      const params = serviceId ? { service_id: serviceId } : {}
+      const params: any = {}
+      if (serviceId) params.service_id = serviceId
+      if (withSlots) params.with_slots = 'true'
+
       const response = await httpClient.get<any>(
         `${this.endpoint}/staff`,
         { params }

@@ -89,7 +89,7 @@ export const useBookingStore = defineStore('booking', () => {
     error.value = null
 
     try {
-      staff.value = await altegService.fetchStaff(selectedService.value.id)
+      staff.value = await altegService.fetchStaff(selectedService.value.id, true)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Ошибка загрузки мастеров'
       console.error('Failed to load staff:', err)

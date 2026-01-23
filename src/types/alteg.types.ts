@@ -34,6 +34,7 @@ export interface AltegStaff {
   description?: string
   information?: string
   services?: number[] // ID услуг, которые выполняет
+  next_slots?: { time: string; date: string }[] // Quick availability slots
 }
 
 export interface AltegScheduleSlot {
