@@ -121,7 +121,7 @@ class HttpClient {
 // API endpoints configuration
 const API_CONFIG = {
   // В production это должен быть URL вашего backend API
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
 }
 
 export const httpClient = new HttpClient(API_CONFIG.baseURL)

@@ -1,21 +1,24 @@
 <template>
-  <button
-    :class="[
-      'btn-base',
-      variantClasses,
-      sizeClasses,
-      { 'opacity-50 cursor-not-allowed': disabled || loading }
-    ]"
+  <Button
+    :variant="mappedVariant"
+    :size="mappedSize"
     :disabled="disabled || loading"
+    :class="[
+      'font-heading font-semibold uppercase tracking-[0.05em] transition-all duration-300',
+      'cursor-pointer hover:scale-[1.02] active:scale-[0.98]',
+      'disabled:opacity-50 disabled:cursor-not-allowed',
+      $attrs.class
+    ]"
     @click="handleClick"
   >
-    <span v-if="loading" class="btn-spinner"></span>
-    <slot v-else></slot>
-  </button>
+    <span v-if="loading" class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+    <slot></slot>
+  </Button>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline'
@@ -35,23 +38,38 @@ const emit = defineEmits<{
   click: [event: MouseEvent]
 }>()
 
-const variantClasses = computed(() => {
-  const variants = {
-    primary: 'btn-primary',
-    secondary: 'btn-secondary',
-    ghost: 'btn-ghost',
-    outline: 'border-2 border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-dark',
+const mappedVariant = computed(() => {
+  switch (props.variant) {
+    case 'primary':
+      return 'default'
+    case 'secondary':
+      // Mapping secondary to 'secondary' variant (Dark bg, Gold text per our global override)
+      return 'secondary'
+    case 'ghost':
+      return 'ghost'
+    case 'outline':
+      // Outline in original was Gold border/text.
+      // Shadcn outline is generic border. We might want to use 'outline' but if it doesn't look gold, we can add classes.
+      // But for now, standard outline uses border-input (white/10) and text-primary.
+      // If we want Gold Outline, we might need a custom class or variant. 
+      // Let's stick to 'outline' for now to be "Shadcn-native".
+      return 'outline'
+    default:
+      return 'default'
   }
-  return variants[props.variant]
 })
 
-const sizeClasses = computed(() => {
-  const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-8 py-4 text-base',
-    lg: 'px-12 py-5 text-lg',
+const mappedSize = computed(() => {
+  switch (props.size) {
+    case 'sm':
+      return 'sm'
+    case 'md':
+      return 'default'
+    case 'lg':
+      return 'lg'
+    default:
+      return 'default'
   }
-  return sizes[props.size]
 })
 
 const handleClick = (event: MouseEvent) => {
@@ -60,37 +78,4 @@ const handleClick = (event: MouseEvent) => {
   }
 }
 </script>
-
-<style scoped>
-.btn-base {
-  position: relative;
-  font-family: var(--font-heading);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  overflow: hidden;
-  transition: all 0.3s;
-  user-select: none;
-}
-
-.btn-base:active {
-  transform: scale(0.95);
-}
-
-.btn-spinner {
-  display: inline-block;
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 9999px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>
 

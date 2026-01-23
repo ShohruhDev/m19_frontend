@@ -1,9 +1,9 @@
 /**
- * Toast Composable
- * Простая система уведомлений
+ * Toast Composable using Sonner (Shadcn UI)
  */
 
 import { ref } from 'vue'
+import { toast } from 'vue-sonner'
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -14,27 +14,35 @@ export interface Toast {
   duration?: number
 }
 
+// Deprecated: Sonner manages its own state.
+// We keep this empty or as a dummy to avoid breaking TS if some component reads it, 
+// though they shouldn't anymore as ToastContainer is updated.
 const toasts = ref<Toast[]>([])
-let toastId = 0
 
 export function useToast() {
   const show = (message: string, type: ToastType = 'info', duration = 3000) => {
-    const id = `toast-${toastId++}`
-
-    toasts.value.push({
-      id,
-      type,
-      message,
-      duration,
-    })
-
-    if (duration > 0) {
-      setTimeout(() => {
-        remove(id)
-      }, duration)
+    // Sonner doesn't return an ID in the same way, but it handles display.
+    // We map 'type' to sonner methods.
+    const options = { duration }
+    let id: string | number = ''
+    
+    switch (type) {
+      case 'success':
+        id = toast.success(message, options)
+        break
+      case 'error':
+        id = toast.error(message, options)
+        break
+      case 'warning':
+        id = toast.warning(message, options)
+        break
+      case 'info':
+      default:
+        id = toast.info(message, options)
+        break
     }
-
-    return id
+    
+    return String(id)
   }
 
   const success = (message: string, duration?: number) => {
@@ -42,7 +50,7 @@ export function useToast() {
   }
 
   const error = (message: string, duration?: number) => {
-    return show(message, 'error', duration || 5000) // Errors stay longer
+    return show(message, 'error', duration || 5000)
   }
 
   const warning = (message: string, duration?: number) => {
@@ -54,18 +62,15 @@ export function useToast() {
   }
 
   const remove = (id: string) => {
-    const index = toasts.value.findIndex(t => t.id === id)
-    if (index >= 0) {
-      toasts.value.splice(index, 1)
-    }
+    toast.dismiss(id)
   }
 
   const clear = () => {
-    toasts.value = []
+    toast.dismiss()
   }
 
   return {
-    toasts,
+    toasts, // Legacy support, empty
     show,
     success,
     error,

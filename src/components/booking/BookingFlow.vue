@@ -1,149 +1,137 @@
 <template>
-  <BaseModal
-    :is-open="isOpen"
-    size="lg"
-    @close="handleClose"
-  >
-    <template #header>
-      <div class="space-y-4">
-        <h2 class="text-3xl font-heading font-bold text-gradient">Онлайн-запись</h2>
-
-        <!-- Progress bar -->
-        <div class="w-full h-2 bg-dark-50 rounded-full overflow-hidden">
-          <div
-            class="h-full bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 transition-all duration-500"
+  <Dialog :open="isOpen" @update:open="(val) => !val && handleClose()">
+    <DialogContent class="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background border-border">
+      <!-- Header with Progress -->
+      <DialogHeader class="p-6 border-b border-border bg-card">
+        <div class="flex items-center justify-between mb-4">
+          <DialogTitle class="text-2xl font-heading font-bold">Онлайн-запись</DialogTitle>
+          <div class="text-sm font-medium text-muted-foreground pr-8">
+            Шаг <span class="text-primary">{{ stepIndex + 1 }}</span> из {{ totalSteps }}
+          </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="h-2 w-full bg-secondary rounded-full overflow-hidden">
+          <div 
+            class="h-full bg-primary transition-all duration-500 ease-in-out"
             :style="{ width: `${progress}%` }"
           ></div>
         </div>
+        
+        <div class="mt-2 text-sm font-medium text-foreground">
+          {{ stepConfig.title }}
+        </div>
+      </DialogHeader>
 
-        <!-- Step indicator -->
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-white/70">
-            Шаг {{ stepIndex + 1 }} из {{ totalSteps }}
-          </span>
-          <span class="text-gold-500 font-semibold">
-            {{ stepConfig.title }}
-          </span>
+      <!-- Main Content Area -->
+      <div class="p-6 min-h-[400px] max-h-[60vh] overflow-y-auto scrollbar-custom bg-background relative">
+        <Transition :name="transitionName" mode="out-in">
+          <div :key="currentStep" class="booking-step">
+            <ServiceSelection v-if="currentStep === 'service'" />
+            <StaffSelection v-else-if="currentStep === 'staff'" />
+            <DateSelection v-else-if="currentStep === 'date'" />
+            <TimeSelection v-else-if="currentStep === 'time'" />
+            <BookingConfirmation
+              v-else-if="currentStep === 'confirmation'"
+              @back="prevStep"
+              @success="handleSuccess"
+            />
+          </div>
+        </Transition>
+        
+        <!-- Error Alert -->
+        <div v-if="error" class="mt-4 p-4 rounded-md bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+          <svg class="w-5 h-5 text-destructive mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-destructive">{{ error }}</p>
+            <button 
+              class="text-xs text-destructive hover:underline mt-1"
+              @click="clearError"
+            >
+              Закрыть
+            </button>
+          </div>
         </div>
       </div>
-    </template>
 
-    <!-- Step content with transitions -->
-    <div class="min-h-[400px]">
-      <Transition :name="transitionName" mode="out-in">
-        <div :key="currentStep" class="booking-step">
-          <ServiceSelection v-if="currentStep === 'service'" />
-          <StaffSelection v-else-if="currentStep === 'staff'" />
-          <DateSelection v-else-if="currentStep === 'date'" />
-          <TimeSelection v-else-if="currentStep === 'time'" />
-          <BookingConfirmation
-            v-else-if="currentStep === 'confirmation'"
-            @back="prevStep"
-            @success="handleSuccess"
-          />
-        </div>
-      </Transition>
-
-      <!-- Error message -->
-      <div
-        v-if="error"
-        class="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded flex items-start gap-3"
-      >
-        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="flex-1">
-          <p class="text-red-500 text-sm">{{ error }}</p>
-          <button
-            class="mt-2 text-red-400 hover:text-red-300 text-sm underline"
-            @click="clearError"
-          >
-            Закрыть
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <template #footer>
-      <div class="flex gap-4">
-        <BaseButton
+      <!-- Footer Actions -->
+      <DialogFooter class="p-6 border-t border-border bg-muted/20 flex gap-3 sm:justify-between items-center w-full">
+        <Button
           v-if="canGoBack && currentStep !== 'confirmation'"
-          variant="ghost"
-          class="flex-1"
+          variant="outline"
           @click="prevStep"
         >
           Назад
-        </BaseButton>
-        <BaseButton
+        </Button>
+        <div v-else class="flex-1"></div> <!-- Spacer -->
+
+        <Button
           v-if="currentStep !== 'confirmation'"
-          variant="primary"
-          class="flex-1"
+          variant="default"
           :disabled="!canGoNext"
           @click="nextStep"
+          class="flex-1 sm:flex-none sm:min-w-[120px]"
         >
           Далее
-        </BaseButton>
-      </div>
-    </template>
-  </BaseModal>
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 
-  <!-- Success Modal -->
-  <BaseModal
-    :is-open="showSuccessModal"
-    size="md"
-    @close="closeSuccessModal"
-  >
-    <div class="text-center py-8 space-y-6">
-      <!-- Success Icon -->
-      <div class="w-20 h-20 mx-auto bg-gold-500 rounded-full flex items-center justify-center">
-        <svg class="w-10 h-10 text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-        </svg>
+  <!-- Success Dialog -->
+  <Dialog :open="showSuccessModal" @update:open="(val) => !val && closeSuccessModal()">
+    <DialogContent class="sm:max-w-[425px] border-primary/20">
+      <div class="flex flex-col items-center text-center py-6 space-y-4">
+        <div class="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-2">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        
+        <DialogTitle class="text-2xl font-bold">Вы записаны!</DialogTitle>
+        <DialogDescription>
+          Ваша запись успешно подтверждена. Мы отправим детали в SMS.
+        </DialogDescription>
+        
+        <div v-if="bookingResult" class="w-full bg-muted p-4 rounded-lg text-left text-sm space-y-3 mt-4 border border-border">
+            <div class="flex justify-between">
+              <span class="text-muted-foreground">Услуга:</span>
+              <span class="font-medium text-foreground">{{ bookingResult.service.title }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted-foreground">Мастер:</span>
+              <span class="font-medium text-foreground">{{ bookingResult.staff.name }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted-foreground">Время:</span>
+              <span class="font-medium text-foreground">{{ formatDateTime(bookingResult.datetime) }}</span>
+            </div>
+            <div v-if="bookingResult.code" class="flex justify-between items-center border-t border-border/50 pt-2 mt-2">
+              <span class="text-muted-foreground">Код отмены:</span>
+              <span class="font-mono font-bold text-primary text-base">{{ bookingResult.code }}</span>
+            </div>
+        </div>
+        
+        <Button class="w-full mt-4" @click="closeSuccessModal">Отлично</Button>
       </div>
-
-      <div>
-        <h2 class="text-2xl font-heading font-bold text-gold-500 mb-2">
-          Запись успешно создана!
-        </h2>
-        <p class="text-white/70">
-          Подтверждение отправлено на указанный номер телефона
-        </p>
-      </div>
-
-      <div v-if="bookingResult" class="card-premium p-6 space-y-4 text-left">
-        <div>
-          <p class="text-sm text-white/50 mb-1">Услуга</p>
-          <p class="text-lg font-semibold text-white">{{ bookingResult.service.title }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-white/50 mb-1">Мастер</p>
-          <p class="text-lg font-semibold text-white">{{ bookingResult.staff.name }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-white/50 mb-1">Дата и время</p>
-          <p class="text-lg font-semibold text-white">
-            {{ formatDateTime(bookingResult.datetime) }}
-          </p>
-        </div>
-        <div v-if="bookingResult.code" class="pt-4 border-t border-white/10">
-          <p class="text-sm text-white/50 mb-1">Код для отмены</p>
-          <p class="text-xl font-bold text-gold-500 font-mono">{{ bookingResult.code }}</p>
-          <p class="text-xs text-white/50 mt-1">Сохраните этот код для отмены записи</p>
-        </div>
-      </div>
-
-      <BaseButton variant="primary" class="w-full" @click="closeSuccessModal">
-        Отлично!
-      </BaseButton>
-    </div>
-  </BaseModal>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useBookingFlow } from '@/composables'
-import BaseModal from '@/components/ui/BaseModal.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import ServiceSelection from './ServiceSelection.vue'
 import StaffSelection from './StaffSelection.vue'
 import DateSelection from './DateSelection.vue'
@@ -179,17 +167,13 @@ const {
 
 const transitionName = ref<string>('slide-left')
 const showSuccessModal = ref(false)
-const previousStep = ref<number>(stepIndex.value)
 
-// Определяем направление анимации
-watch(() => stepIndex.value, (newIndex: number, oldIndex: number) => {
-  if (oldIndex !== undefined) {
-    previousStep.value = oldIndex
-  }
+// Watch step index for transition direction
+watch(() => stepIndex.value, (newIndex: number, oldIndex: number | undefined) => {
   transitionName.value = newIndex > (oldIndex || 0) ? 'slide-left' : 'slide-right'
 })
 
-// Загрузка услуг при открытии
+// Load services on open
 watch(
   () => props.isOpen,
   (isOpen) => {
@@ -199,17 +183,11 @@ watch(
   }
 )
 
-const nextStep = () => {
-  nextStepAction()
-}
-
-const prevStep = () => {
-  prevStepAction()
-}
+const nextStep = () => nextStepAction()
+const prevStep = () => prevStepAction()
 
 const handleClose = () => {
   emit('close')
-  // Небольшая задержка перед сбросом, чтобы анимация закрытия прошла
   setTimeout(() => {
     resetBooking()
   }, 300)
@@ -247,32 +225,29 @@ onMounted(() => {
   width: 100%;
 }
 
-/* Slide transitions */
 .slide-left-enter-active,
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide-left-enter-from {
   opacity: 0;
-  transform: translateX(100px);
+  transform: translateX(50px);
 }
-
 .slide-left-leave-to {
   opacity: 0;
-  transform: translateX(-100px);
+  transform: translateX(-50px);
 }
 
 .slide-right-enter-from {
   opacity: 0;
-  transform: translateX(-100px);
+  transform: translateX(-50px);
 }
-
 .slide-right-leave-to {
   opacity: 0;
-  transform: translateX(100px);
+  transform: translateX(50px);
 }
 </style>
 

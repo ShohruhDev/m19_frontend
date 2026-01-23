@@ -6,21 +6,35 @@
       </Transition>
     </RouterView>
 
-    <!-- Toast Notifications -->
-    <ToastContainer />
+    <!-- Splash Screen -->
+    <SplashScreen :is-visible="isLoading" />
+
+    <!-- Booking Modal (Global) -->
+    <BookingFlow :is-open="appStore.isBookingModalOpen" @close="appStore.closeBookingModal()" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import { useSmoothScroll } from '@/composables'
+import { useAppStore } from '@/stores'
 import ToastContainer from '@/components/ui/ToastContainer.vue'
+import SplashScreen from '@/components/ui/SplashScreen.vue'
+import BookingFlow from '@/components/booking/BookingFlow.vue'
 
 // Инициализация smooth scroll
 useSmoothScroll()
 
+const appStore = useAppStore()
+const isLoading = ref(true)
+
 onMounted(() => {
+  // Show splash screen for minimum time for branding effect
+  setTimeout(() => {
+    isLoading.value = false
+  }, 1000)
+
   console.log('🚀 M19 Barbershop - Enterprise App Started')
   console.log('🔌 Supabase Integration: Active')
 })

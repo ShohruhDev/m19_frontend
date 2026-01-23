@@ -1,52 +1,35 @@
 <template>
-  <div class="space-y-6">
-    <h2 class="text-2xl font-heading font-bold text-gold-500 mb-6">Выберите дату</h2>
-
+  <div class="space-y-6 flex flex-col items-center">
     <div v-if="isLoading" class="grid grid-cols-7 gap-2">
-      <SkeletonLoader v-for="i in 14" :key="i" type="card" size="sm" />
+      <SkeletonLoader type="card" size="sm" class="h-[300px] w-full" />
     </div>
 
     <div v-else-if="error" class="text-center py-12">
-      <p class="text-red-500">{{ error }}</p>
+      <p class="text-destructive">{{ error }}</p>
     </div>
 
-    <div v-else class="space-y-4">
-      <!-- Календарь -->
-      <div class="grid grid-cols-7 gap-2">
-        <button
-          v-for="date in availableDates"
-          :key="date.date"
-          :class="[
-            'p-4 border-2 transition-all duration-300 flex flex-col items-center justify-center',
-            'hover:border-gold-500 hover:bg-gold-500/10',
-            selectedDate === date.date
-              ? 'border-gold-500 bg-gold-500/20 text-gold-500'
-              : 'border-white/20 text-white',
-            date.slots_count === 0 ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',
-          ]"
-          :disabled="date.slots_count === 0"
-          @click="selectDate(date.date)"
-        >
-          <span class="text-xs text-white/50">{{ formatDayOfWeek(date.date) }}</span>
-          <span class="text-2xl font-bold">{{ formatDay(date.date) }}</span>
-          <span class="text-xs">{{ formatMonth(date.date) }}</span>
-          <span v-if="date.slots_count > 0" class="text-xs text-gold-500 mt-1">
-            {{ date.slots_count }} {{ pluralize(date.slots_count, 'слот', 'слота', 'слотов') }}
-          </span>
-        </button>
-      </div>
+    <div v-else class="w-full flex justify-center">
+      <Calendar
+        v-model="date"
+        class="rounded-md border border-border bg-card shadow-sm"
+        :min-value="minDate"
+        :is-date-unavailable="isDateDisabled"
+        @update:model-value="onDateSelect"
+      />
+    </div>
 
-      <!-- Пустое состояние -->
-      <div v-if="availableDates.length === 0" class="text-center py-12">
-        <p class="text-white/50">Нет доступных дат для записи</p>
-      </div>
+    <div v-if="!selectedDate" class="text-center text-muted-foreground text-sm">
+      Выберите дату для записи
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { useBookingFlow } from '@/composables'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
+import { Calendar } from '@/components/ui/calendar'
+import { DateValue, getLocalTimeZone, today, CalendarDate } from '@internationalized/date'
 
 const {
   availableDates,
@@ -56,38 +39,40 @@ const {
   selectDate: selectDateAction,
 } = useBookingFlow()
 
-const selectDate = (date: string) => {
-  selectDateAction(date)
-}
+// Internal state for Calendar
+const date = ref<DateValue | undefined>()
+const minDate = today(getLocalTimeZone())
 
-const formatDayOfWeek = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', { weekday: 'short' })
-}
-
-const formatDay = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.getDate()
-}
-
-const formatMonth = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', { month: 'short' })
-}
-
-const pluralize = (count: number, one: string, few: string, many: string) => {
-  const mod10 = count % 10
-  const mod100 = count % 100
-
-  if (mod10 === 1 && mod100 !== 11) {
-    return one
+// Sync external selectedDate to internal date
+watch(() => selectedDate.value, (newVal) => {
+  if (newVal) {
+    // newVal is YYYY-MM-DD string
+    const [y, m, d] = newVal.split('-').map(Number)
+    date.value = new CalendarDate(y, m, d)
   }
+}, { immediate: true })
 
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
-    return few
-  }
+const onDateSelect = (newDate: DateValue | undefined) => {
+  if (!newDate) return
+  // Convert DateValue to YYYY-MM-DD string for our store
+  const y = newDate.year
+  const m = String(newDate.month).padStart(2, '0')
+  const d = String(newDate.day).padStart(2, '0')
+  const dateString = `${y}-${m}-${d}`
+  
+  selectDateAction(dateString)
+}
 
-  return many
+// Disable dates that are not in `availableDates` or have 0 slots
+const isDateDisabled = (dateVal: DateValue) => {
+  const y = dateVal.year
+  const m = String(dateVal.month).padStart(2, '0')
+  const d = String(dateVal.day).padStart(2, '0')
+  const dateString = `${y}-${m}-${d}`
+
+  const found = availableDates.value.find(ad => ad.date === dateString)
+  if (!found) return true // Disable if not in available list
+  return found.slots_count === 0
 }
 </script>
 

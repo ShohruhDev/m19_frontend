@@ -10,9 +10,10 @@
         <!-- Logo -->
         <RouterLink
           to="/"
-          class="text-2xl md:text-3xl font-heading font-bold text-gradient hover:scale-105 transition-transform duration-300"
+          class="flex items-center gap-2 hover:scale-105 transition-transform duration-300"
         >
-          M19
+          <img src="@/assets/logo.png" alt="M19 Logo" class="h-12 w-auto object-contain" />
+          <!-- Optional: Keep text if logo is icon-only, but usually logo replaces text. -->
         </RouterLink>
 
         <!-- Desktop Navigation -->
@@ -21,13 +22,29 @@
             v-for="item in navItems"
             :key="item.path"
             :to="item.path"
-            class="text-white/70 hover:text-gold-500 font-heading font-medium uppercase tracking-wider
-                   transition-colors duration-300 relative group"
+            custom
+            v-slot="{ navigate, href, isActive, isExactActive }"
           >
-            {{ item.name }}
-            <span
-              class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-500 group-hover:w-full transition-all duration-300"
-            ></span>
+            <a
+              :href="href"
+              @click="navigate"
+              class="font-heading font-medium uppercase tracking-wider transition-colors duration-300 relative group"
+              :class="[
+                isActive || (item.path === '/' && isExactActive) 
+                  ? 'text-gold-500' 
+                  : 'text-white/70 hover:text-gold-500'
+              ]"
+            >
+              {{ item.name }}
+              <span
+                class="absolute -bottom-1 left-0 h-0.5 bg-gold-500 transition-all duration-300"
+                :class="[
+                   isActive || (item.path === '/' && isExactActive)
+                     ? 'w-full' 
+                     : 'w-0 group-hover:w-full'
+                ]"
+              ></span>
+            </a>
           </RouterLink>
         </nav>
 
@@ -75,11 +92,21 @@
             v-for="item in navItems"
             :key="item.path"
             :to="item.path"
-            class="block text-lg font-heading font-medium text-white/70 hover:text-gold-500
-                   transition-colors duration-300 py-2"
-            @click="closeMobileMenu"
+            custom
+            v-slot="{ navigate, href, isActive, isExactActive }"
           >
-            {{ item.name }}
+            <a
+              :href="href"
+              class="block text-lg font-heading font-medium transition-colors duration-300 py-2 border-l-2 pl-4"
+              :class="[
+                 isActive || (item.path === '/' && isExactActive)
+                   ? 'text-gold-500 border-gold-500 bg-white/5' 
+                   : 'text-white/70 hover:text-gold-500 border-transparent hover:border-gold-500/50'
+              ]"
+              @click="(e) => { navigate(e); closeMobileMenu(); }"
+            >
+              {{ item.name }}
+            </a>
           </RouterLink>
 
           <BaseButton

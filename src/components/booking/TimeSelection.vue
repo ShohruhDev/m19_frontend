@@ -1,41 +1,36 @@
 <template>
   <div class="space-y-6">
-    <h2 class="text-2xl font-heading font-bold text-gold-500 mb-6">Выберите время</h2>
+    <h2 class="text-xl font-heading font-semibold text-primary mb-6">Выберите время</h2>
 
     <div v-if="isLoading" class="grid grid-cols-4 gap-3">
-      <SkeletonLoader v-for="i in 12" :key="i" type="card" size="sm" />
+      <Skeleton v-for="i in 12" :key="i" class="h-12 w-full" />
     </div>
 
     <div v-else-if="error" class="text-center py-12">
-      <p class="text-red-500">{{ error }}</p>
+      <p class="text-destructive">{{ error }}</p>
     </div>
 
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-6 h-[400px] overflow-y-auto pr-2 scrollbar-custom">
       <!-- Временные слоты по времени суток -->
       <div v-for="period in timePeriods" :key="period.name" class="space-y-3">
-        <h3 class="text-lg font-heading font-semibold text-white/70">{{ period.name }}</h3>
+        <h3 class="text-sm font-medium text-muted-foreground">{{ period.name }}</h3>
 
-        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-          <button
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+          <Button
             v-for="slot in period.slots"
             :key="slot.datetime"
-            :class="[
-              'p-4 border-2 font-semibold transition-all duration-300',
-              'hover:border-gold-500 hover:bg-gold-500/10 hover:scale-105',
-              selectedTime?.datetime === slot.datetime
-                ? 'border-gold-500 bg-gold-500 text-dark'
-                : 'border-white/20 text-white',
-            ]"
+            :variant="selectedTime?.datetime === slot.datetime ? 'default' : 'outline'"
+            class="w-full"
             @click="selectTime(slot)"
           >
             {{ slot.time }}
-          </button>
+          </Button>
         </div>
       </div>
 
       <!-- Пустое состояние -->
       <div v-if="availableSlots.length === 0" class="text-center py-12">
-        <p class="text-white/50">Нет доступного времени на выбранную дату</p>
+        <p class="text-muted-foreground">Нет доступного времени на выбранную дату</p>
       </div>
     </div>
   </div>
@@ -44,7 +39,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useBookingFlow } from '@/composables'
-import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import type { AltegScheduleSlot } from '@/types'
 
 const {

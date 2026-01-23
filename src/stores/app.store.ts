@@ -33,11 +33,13 @@ export const useAppStore = defineStore('app', () => {
   function openBookingModal() {
     isBookingModalOpen.value = true
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden' // Force scroll lock on root
   }
 
   function closeBookingModal() {
     isBookingModalOpen.value = false
     document.body.style.overflow = ''
+    document.documentElement.style.overflow = ''
   }
 
   function updateScrollProgress(progress: number) {

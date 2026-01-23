@@ -83,8 +83,8 @@
               </div>
 
               <BaseButton
-                variant="secondary"
-                class="w-full"
+                variant="outline"
+                class="w-full hover:bg-gold-500 hover:text-black border-gold-500/50 text-gold-500"
                 @click="bookWithMaster(master)"
               >
                 Записаться к мастеру
@@ -112,24 +112,36 @@ const isLoading = ref(true)
 const error = ref<string | null>(null)
 const staffMembers = ref<any[]>([])
 
+// Helper to strip HTML tags
+const stripHtml = (html: string) => {
+  if (!html) return ''
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
+
 const fetchStaff = async () => {
   try {
     isLoading.value = true
     const staff = await altegService.fetchStaff()
     
-    // Transform API data to UI format
-    staffMembers.value = staff.map((master: AltegStaff) => ({
-      ...master,
-      // Map API fields or provide defaults for UI
-      name: master.name,
-      role: master.specialization || 'Барбер', 
-      description: master.information || 'Профессионал своего дела',
-      rating: 5.0, // API doesn't usually provide rating, default to 5
-      reviews: Math.floor(Math.random() * 50) + 20, // Mock reviews count for now
-      experience: 5, // Mock experience
-      specializations: master.specialization ? [master.specialization] : ['Мужские стрижки'],
-      avatar: master.avatar_big || master.avatar
-    }))
+    // Filter and Transform API data
+    staffMembers.value = staff
+      .filter((master: AltegStaff) => {
+        const role = (master.specialization || 'Барбер').toLowerCase()
+        // Show only Barbers (exclude Reception, Admin, Accountant, etc.)
+        return role.includes('barber') || role.includes('барбер')
+      })
+      .map((master: AltegStaff) => ({
+        ...master,
+        name: master.name,
+        role: master.specialization || 'Барбер', 
+        description: stripHtml(master.information || master.description || 'Профессионал своего дела'),
+        rating: master.rating || 5.0,
+        reviews: master.reviews_count || 0,
+        experience: master.experience_years || 0,
+        specializations: master.services ? ['Универсал'] : (master.specialization ? [master.specialization] : ['Мужские стрижки']),
+        avatar: master.avatar_big || master.avatar_url || master.avatar
+      }))
   } catch (err) {
     console.error('Failed to load staff:', err)
     error.value = 'Не удалось загрузить список мастеров'

@@ -1,6 +1,16 @@
 <template>
-  <div class="relative w-full">
-    <input
+  <div class="grid w-full items-center gap-2">
+    <Label
+      v-if="label"
+      :for="id"
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      :class="error ? 'text-destructive' : 'text-primary'"
+    >
+      {{ label }}
+      <span v-if="required" class="text-destructive">*</span>
+    </Label>
+    
+    <Input
       :id="id"
       v-model="inputValue"
       :type="type"
@@ -8,29 +18,23 @@
       :disabled="disabled"
       :required="required"
       :class="[
-        'w-full px-6 py-4 bg-dark-50 border-2 text-white placeholder-white/50',
-        'font-sans transition-all duration-300',
-        'focus:outline-none focus:border-gold-500 focus:bg-dark-100',
-        error ? 'border-red-500' : 'border-white/20',
+        'h-14 px-6 bg-secondary/50 border-input text-foreground placeholder:text-muted-foreground',
+        'focus-visible:ring-primary focus-visible:border-primary',
+        error ? 'border-destructive focus-visible:ring-destructive' : '',
         disabled ? 'opacity-50 cursor-not-allowed' : '',
       ]"
       @blur="handleBlur"
     />
-    <label
-      v-if="label"
-      :for="id"
-      class="absolute -top-3 left-4 px-2 bg-dark text-sm text-gold-500 font-medium"
-    >
-      {{ label }}
-      <span v-if="required" class="text-red-500">*</span>
-    </label>
-    <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
-    <p v-else-if="hint" class="mt-2 text-sm text-white/50">{{ hint }}</p>
+    
+    <p v-if="error" class="text-sm font-medium text-destructive">{{ error }}</p>
+    <p v-else-if="hint" class="text-sm text-muted-foreground">{{ hint }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface Props {
   id: string
@@ -57,7 +61,7 @@ const emit = defineEmits<{
 
 const inputValue = computed({
   get: () => props.modelValue,
-  set: (value: string) => emit('update:modelValue', value),
+  set: (value: string | number) => emit('update:modelValue', String(value)),
 })
 
 const handleBlur = () => {

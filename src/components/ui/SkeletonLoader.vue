@@ -1,11 +1,10 @@
 <template>
-  <div class="skeleton-loader" :class="[type, sizeClass]">
-    <div class="shimmer"></div>
-  </div>
+  <Skeleton :class="['bg-muted', skeletonClasses]" />
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Props {
   type?: 'text' | 'avatar' | 'card' | 'image'
@@ -17,7 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
 })
 
-const sizeClass = computed(() => {
+const skeletonClasses = computed(() => {
   const sizes = {
     text: {
       sm: 'h-4 w-32',
@@ -43,34 +42,4 @@ const sizeClass = computed(() => {
   return sizes[props.type][props.size]
 })
 </script>
-
-<style scoped>
-.skeleton-loader {
-  position: relative;
-  overflow: hidden;
-  background-color: var(--color-dark-50);
-}
-
-.shimmer {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(212, 175, 55, 0.1) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-</style>
 
