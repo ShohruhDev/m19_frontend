@@ -13,7 +13,7 @@
           </div>
           <div class="text-right">
             <p class="text-2xl font-bold text-primary">{{ formatPrice(totalPrice) }}</p>
-            <p class="text-sm text-muted-foreground">{{ estimatedDuration }} минут</p>
+            <p class="text-sm text-muted-foreground">{{ formatDuration(estimatedDuration) }}</p>
           </div>
         </div>
 
@@ -266,6 +266,17 @@ const formatPrice = (price: number) => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(price)
+}
+
+const formatDuration = (seconds: number) => {
+  if (!seconds) return '—'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return mins > 0 ? `${hours} ч ${mins} мин` : `${hours} ч`
+  }
+  return `${minutes} мин`
 }
 </script>
 
