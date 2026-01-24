@@ -59,7 +59,7 @@
             </template>
             <template v-else>
                <RouterLink to="/login" class="text-white/80 hover:text-gold-500 font-medium transition-colors">
-                 Войти
+                 Личный кабинет
                </RouterLink>
             </template>
 
@@ -75,7 +75,7 @@
             </svg>
             <span 
               v-if="cartStore.totalItems > 0"
-              class="absolute -top-1 -right-1 bg-m19-gold text-dark text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center"
+              class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 animate-pulse"
             >
               {{ cartStore.totalItems }}
             </span>
@@ -149,7 +149,7 @@
              </template>
              <template v-else>
                 <RouterLink to="/login" class="block text-lg font-heading font-medium text-white/70 hover:text-gold-500" @click="closeMobileMenu">
-                  Войти
+                  Личный кабинет
                 </RouterLink>
              </template>
           </div>

@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { altegService } from '@/services/alteg.service'
 import { formatErrorMessage } from '@/utils/errorHandler'
+import { mockProducts, mockCategories } from '@/data/mockProducts'
 
 // Interface based on Altegio Goods (Mixed: Category or Item)
 export interface CatalogItem {
@@ -38,45 +39,30 @@ export const useProductsStore = defineStore('products', () => {
   async function fetchAllProducts() {
     loading.value = true
     error.value = null
-    const allItems: CatalogItem[] = []
-    const catNames = new Set<string>()
 
     try {
-      // 1. Fetch Root
-      const rootGoods = await altegService.fetchGoods({ parent_id: 0 })
+      // Simulate API delay for realism
+      await new Promise(resolve => setTimeout(resolve, 500))
 
-      // Process Root
-      for (const node of rootGoods) {
-        // Correctly handle is_category flag (string/bool/int)
-        const isCat = node.is_category === true || node.is_category === 'true' || node.is_category === 1
+      // Use mock data
+      const allItems: CatalogItem[] = mockProducts.map(product => ({
+        id: product.id,
+        title: product.title,
+        is_category: false,
+        is_item: true,
+        price: product.price,
+        image_url: product.image_url,
+        description: product.description,
+        parent_id: 0,
+        category_id: product.category_id,
+        amount: product.amount,
+        category_name: mockCategories.find(c => c.id === product.category_id)?.title || 'Прочее'
+      }))
 
-        if (isCat) {
-          // It is a Folder/Brand. Add to categories list.
-          catNames.add(node.title)
-
-          try {
-            // 2. Fetch Children (One level deep recursion for now)
-            // If we need deeper, we'd need a recursive function.
-            // Usually cosmetics catalog is Brand -> Product.
-            const children = await altegService.fetchGoods({ parent_id: node.category_id || node.id })
-
-            children.forEach((child: any) => {
-              const isChildCat = child.is_category === true || child.is_category === 'true' || child.is_category === 1
-              if (!isChildCat) {
-                allItems.push(mapToItem(child, node.title))
-              }
-            })
-          } catch (e) {
-            console.error(`Failed to fetch children for ${node.title}`, e)
-          }
-        } else {
-          // Root level product
-          allItems.push(mapToItem(node, 'Прочее'))
-        }
-      }
+      const catNames = mockCategories.map(c => c.title)
 
       items.value = allItems
-      categories.value = Array.from(catNames)
+      categories.value = catNames
     } catch (err: any) {
       error.value = formatErrorMessage(err)
       console.error(err)

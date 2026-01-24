@@ -252,35 +252,17 @@ class AltegIntegrationService {
     return emailRegex.test(email)
   }
   /**
-   * Запросить код авторизации по SMS
+   * Authenticate user with login and password
    */
-  async requestAuthCode(phone: string): Promise<boolean> {
+  async authenticateUser(login: string, password: string): Promise<{ token: string; user: any }> {
     try {
       const response = await httpClient.post<any>(
-        `${this.endpoint}/auth/user/authentication_code`,
-        { phone }
+        `${this.endpoint}/auth/login`,
+        { login, password }
       )
-      // Обычно успешный ответ содержит { success: true, ... }
-      return response.data?.success || response.data?.meta?.success || true
-    } catch (error) {
-      console.error('Error requesting auth code:', error)
-      throw new Error('Не удалось отправить SMS код')
-    }
-  }
-
-  /**
-   * Авторизация пользователя (обмен кода на токен)
-   */
-  async authenticateUser(phone: string, code: string): Promise<{ token: string; user: any }> {
-    try {
-      const response = await httpClient.post<any>(
-        `${this.endpoint}/auth/user/authenticate`,
-        { phone, code }
-      )
-      // Ожидаем ответ с user_token и данными пользователя
-      const data = response.data?.data
+      const data = response.data
       if (!data || !data.user_token) {
-        throw new Error('Токен не получен')
+        throw new Error('Не удалось авторизоваться')
       }
       return {
         token: data.user_token,
@@ -288,13 +270,13 @@ class AltegIntegrationService {
           id: data.id,
           name: data.name,
           phone: data.phone,
-          avatar: data.avatar,
-          email: data.email
+          email: data.email,
+          avatar: data.avatar
         }
       }
     } catch (error) {
       console.error('Error authenticating user:', error)
-      throw new Error('Ошибка авторизации. Проверьте код.')
+      throw new Error('Неверный логин или пароль')
     }
   }
 

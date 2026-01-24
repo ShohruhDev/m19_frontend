@@ -5,22 +5,22 @@
     <Card class="w-full max-w-md border-white/10 bg-dark-50 backdrop-blur">
       <CardHeader>
         <CardTitle class="text-2xl font-heading text-white text-center">
-          {{ step === 1 ? 'Вход в личный кабинет' : 'Подтверждение' }}
+          Вход в личный кабинет
         </CardTitle>
         <CardDescription class="text-center text-white/60">
-          {{ step === 1 ? 'Введите номер телефона для получения кода' : 'Введите код из SMS' }}
+          Введите телефон и пароль
         </CardDescription>
       </CardHeader>
       
       <CardContent>
         <form @submit.prevent="handleSubmit" class="space-y-4">
-          <!-- Step 1: Phone -->
-          <div v-if="step === 1" class="space-y-2">
-            <Label for="phone">Номер телефона</Label>
+          <!-- Phone/Email -->
+          <div class="space-y-2">
+            <Label for="login">Телефон или Email</Label>
             <Input
-              id="phone"
-              v-model="phone"
-              type="tel"
+              id="login"
+              v-model="login"
+              type="text"
               placeholder="+998 (__) ___-__-__"
               required
               class="bg-dark/50 border-white/20 text-white"
@@ -28,17 +28,16 @@
             />
           </div>
 
-          <!-- Step 2: Code -->
-          <div v-if="step === 2" class="space-y-2">
-            <Label for="code">Код из SMS</Label>
+          <!-- Password -->
+          <div class="space-y-2">
+            <Label for="password">Пароль</Label>
             <Input
-              id="code"
-              v-model="code"
-              type="text"
-              placeholder="Введите код"
+              id="password"
+              v-model="password"
+              type="password"
+              placeholder="Введите пароль"
               required
-              class="bg-dark/50 border-white/20 text-white text-center text-2xl tracking-widest"
-              maxlength="6"
+              class="bg-dark/50 border-white/20 text-white"
               :disabled="isLoading"
             />
           </div>
@@ -53,19 +52,8 @@
             :disabled="isLoading"
           >
             <span v-if="isLoading" class="mr-2 animate-spin">⏳</span>
-            {{ step === 1 ? 'Получить код' : 'Войти' }}
+            Войти
           </Button>
-
-          <div v-if="step === 2" class="text-center">
-             <button 
-               type="button" 
-               class="text-sm text-white/50 hover:text-white"
-               @click="step = 1"
-               :disabled="isLoading"
-             >
-               Изменить номер
-             </button>
-          </div>
         </form>
       </CardContent>
     </Card>
@@ -80,14 +68,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import AppHeader from '@/components/common/AppHeader.vue' // Assuming AppHeader is global or imported
+import AppHeader from '@/components/common/AppHeader.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const step = ref(1)
-const phone = ref('+998')
-const code = ref('')
+const login = ref('+998')
+const password = ref('')
 const error = ref<string | null>(null)
 const isLoading = ref(false)
 
@@ -96,27 +83,24 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    if (step.value === 1) {
-      // Clean phone number if needed, basic validation
-      if (phone.value.length < 9) {
-        error.value = 'Введите корректный номер'
-        isLoading.value = false
-        return
-      }
-      
-      const success = await authStore.requestAuthCode(phone.value)
-      if (success) {
-        step.value = 2
-      } else {
-        error.value = authStore.error || 'Не удалось отправить код'
-      }
+    // Basic validation
+    if (login.value.length < 5) {
+      error.value = 'Введите корректный логин'
+      isLoading.value = false
+      return
+    }
+
+    if (password.value.length < 3) {
+      error.value = 'Введите пароль'
+      isLoading.value = false
+      return
+    }
+
+    const success = await authStore.login(login.value, password.value)
+    if (success) {
+      router.push({ name: 'Profile' })
     } else {
-      const success = await authStore.login(phone.value, code.value)
-      if (success) {
-        router.push({ name: 'Profile' }) // Redirect to profile
-      } else {
-        error.value = authStore.error || 'Неверный код'
-      }
+      error.value = authStore.error || 'Неверный логин или пароль'
     }
   } catch (e: any) {
     error.value = e.message

@@ -10,24 +10,11 @@ export const useAuthStore = defineStore('auth', () => {
     const error = ref<string | null>(null)
 
     // Actions
-    async function requestAuthCode(phone: string): Promise<boolean> {
+    async function login(login: string, password: string): Promise<boolean> {
         isLoading.value = true
         error.value = null
         try {
-            return await altegService.requestAuthCode(phone)
-        } catch (e: any) {
-            error.value = e.message
-            return false
-        } finally {
-            isLoading.value = false
-        }
-    }
-
-    async function login(phone: string, code: string): Promise<boolean> {
-        isLoading.value = true
-        error.value = null
-        try {
-            const result = await altegService.authenticateUser(phone, code)
+            const result = await altegService.authenticateUser(login, password)
             token.value = result.token
             user.value = result.user
 
@@ -71,7 +58,6 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         isLoading,
         error,
-        requestAuthCode,
         login,
         logout,
         loadUser

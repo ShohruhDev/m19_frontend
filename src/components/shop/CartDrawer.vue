@@ -4,108 +4,142 @@
       <div v-if="appStore.isCartOpen" class="fixed inset-0 z-50 flex justify-end">
         <!-- Backdrop -->
         <div 
-          class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          class="absolute inset-0 bg-black/60 backdrop-blur-md"
           @click="appStore.closeCart()"
         ></div>
 
         <!-- Drawer -->
-        <div class="relative w-full max-w-md h-full bg-white shadow-2xl flex flex-col p-6 animate-slide-in">
+        <div class="relative w-full max-w-lg h-full bg-dark-900 shadow-2xl flex flex-col animate-slide-in">
           <!-- Header -->
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-serif text-m19-dark">Корзина</h2>
+          <div class="flex items-center justify-between p-6 border-b border-white/10">
+            <h2 class="text-2xl font-heading text-white">Корзина</h2>
             <button 
               @click="appStore.closeCart()"
-              class="p-2 hover:bg-slate-100 rounded-full transition-colors"
+              class="p-2 hover:bg-white/5 rounded-lg transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white/70 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           <!-- Empty State -->
-          <div v-if="cartStore.items.length === 0" class="flex-1 flex flex-col items-center justify-center text-center">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div v-if="cartStore.items.length === 0" class="flex-1 flex flex-col items-center justify-center text-center px-6">
+            <div class="w-20 h-20 bg-gold-500/10 rounded-full flex items-center justify-center mb-4 backdrop-blur">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gold-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <p class="text-slate-500 mb-4">Ваша корзина пуста</p>
+            <p class="text-lg text-white/60 mb-2">Ваша корзина пуста</p>
+            <p class="text-sm text-white/40 mb-6">Добавьте товары для оформления заказа</p>
             <button 
               @click="appStore.closeCart()"
-              class="text-m19-gold font-medium hover:underline"
+              class="px-6 py-3 bg-gold-500 hover:bg-gold-600 text-dark font-heading font-medium rounded-lg transition-all duration-300"
             >
               Перейти к покупкам
             </button>
           </div>
 
           <!-- Items List -->
-          <div v-else class="flex-1 overflow-y-auto -mx-6 px-6 space-y-4">
-            <div 
-              v-for="item in cartStore.items" 
-              :key="item.id"
-              class="flex gap-4"
-            >
-              <!-- Image -->
-              <div class="w-20 h-20 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                <img 
-                  v-if="item.image"
-                  :src="item.image" 
-                  class="w-full h-full object-cover"
-                />
-                <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
-                  📷
-                </div>
-              </div>
-
-              <!-- Info -->
-              <div class="flex-1 flex flex-col justify-between">
-                <div>
-                  <h4 class="font-medium text-m19-dark line-clamp-2">{{ item.title }}</h4>
-                  <p class="text-sm text-m19-gold font-medium">{{ item.price }} ₽</p>
-                </div>
-
-                <div class="flex items-center justify-between mt-2">
-                  <div class="flex items-center border border-slate-200 rounded-lg">
-                    <button 
-                      @click="cartStore.updateQuantity(item.id, item.quantity - 1)"
-                      class="px-2 py-1 hover:bg-slate-50 text-slate-500"
-                    >
-                      -
-                    </button>
-                    <span class="px-2 text-sm">{{ item.quantity }}</span>
-                    <button 
-                      @click="cartStore.updateQuantity(item.id, item.quantity + 1)"
-                      class="px-2 py-1 hover:bg-slate-50 text-slate-500"
-                    >
-                      +
-                    </button>
+          <div v-else class="flex-1 overflow-y-auto px-6 py-4">
+            <TransitionGroup name="cart-item" tag="div" class="space-y-4">
+              <div 
+                v-for="item in cartStore.items" 
+                :key="item.id"
+                class="group bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-gold-500/50 transition-all duration-300"
+              >
+                <div class="flex gap-4">
+                  <!-- Image -->
+                  <div class="relative w-24 h-24 bg-dark-800 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-white/5 group-hover:ring-gold-500/30 transition-all">
+                    <img 
+                      v-if="item.image"
+                      :src="item.image" 
+                      :alt="item.title"
+                      class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div v-else class="w-full h-full flex items-center justify-center text-3xl">
+                      📦
+                    </div>
                   </div>
-                  <button 
-                    @click="cartStore.removeItem(item.id)"
-                    class="text-xs text-red-500 hover:text-red-600"
-                  >
-                    Удалить
-                  </button>
+
+                  <!-- Info -->
+                  <div class="flex-1 flex flex-col justify-between min-w-0">
+                    <div>
+                      <h4 class="font-heading font-medium text-white text-lg line-clamp-1 mb-1">{{ item.title }}</h4>
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-xl font-heading text-gold-500">{{ formatPrice(item.price * item.quantity) }}</span>
+                        <span class="text-sm text-white/40">({{ formatPrice(item.price) }} × {{ item.quantity }})</span>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-3">
+                      <!-- Quantity Controls -->
+                      <div class="flex items-center gap-2 bg-dark-800/50 border border-white/10 rounded-lg p-1">
+                        <button 
+                          @click="cartStore.updateQuantity(item.id, item.quantity - 1)"
+                          class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-md text-white/70 hover:text-gold-500 transition-all font-medium"
+                        >
+                          −
+                        </button>
+                        <span class="w-8 text-center font-heading text-white">{{ item.quantity }}</span>
+                        <button 
+                          @click="cartStore.updateQuantity(item.id, item.quantity + 1)"
+                          class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-md text-white/70 hover:text-gold-500 transition-all font-medium"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <!-- Remove Button -->
+                      <button 
+                        @click="cartStore.removeItem(item.id)"
+                        class="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors font-medium uppercase tracking-wide"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Удалить
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </TransitionGroup>
           </div>
 
           <!-- Footer / Checkout -->
-          <div v-if="cartStore.items.length > 0" class="mt-6 border-t pt-4">
-            <div class="flex justify-between items-end mb-4">
-              <span class="text-slate-500">Итого:</span>
-              <span class="text-2xl font-serif text-m19-dark">{{ cartStore.totalPrice }} ₽</span>
+          <div v-if="cartStore.items.length > 0" class="p-6 border-t border-white/10 bg-dark-900/95 backdrop-blur">
+            <!-- Subtotal -->
+            <div class="space-y-2 mb-4">
+              <div class="flex justify-between text-white/60">
+                <span>Товаров:</span>
+                <span>{{ cartStore.items.length }}</span>
+              </div>
+              <div class="flex justify-between items-baseline pt-3 border-t border-white/5">
+                <span class="text-lg text-white/80 font-heading">Итого:</span>
+                <span class="text-3xl font-heading text-gold-500">{{ formatPrice(cartStore.totalPrice) }}</span>
+              </div>
             </div>
 
+            <!-- Checkout Button -->
             <button 
               @click="handleCheckout"
               :disabled="loading"
-              class="w-full py-3 bg-m19-dark text-white rounded-lg font-medium hover:bg-black transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              class="w-full py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-dark rounded-xl font-heading font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 transform hover:scale-[1.02] active:scale-[0.98]"
             >
+              <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
               <span v-if="loading" class="animate-spin">⌛</span>
-              {{ loading ? 'Оформление...' : 'Оформить заказ' }}
+              {{ loading ? 'Оформляется...' : 'Оформить заказ' }}
+            </button>
+
+            <!-- Continue Shopping -->
+            <button 
+              @click="appStore.closeCart()"
+              class="w-full mt-3 py-2 text-white/60 hover:text-gold-500 font-medium text-sm transition-colors"
+            >
+              Продолжить покупки
             </button>
           </div>
         </div>
@@ -125,6 +159,15 @@ const cartStore = useCartStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const loading = ref(false)
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'UZS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(price).replace('UZS', 'сўм')
+}
 
 const handleCheckout = async () => {
   if (!authStore.isAuthenticated) {
@@ -160,13 +203,49 @@ const handleCheckout = async () => {
 </script>
 
 <style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
+.slide-fade-enter-active {
   transition: opacity 0.3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   opacity: 0;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Cart item animations */
+.cart-item-enter-active,
+.cart-item-leave-active {
+  transition: all 0.3s ease;
+}
+
+.cart-item-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.cart-item-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.cart-item-move {
+  transition: transform 0.3s ease;
 }
 </style>
