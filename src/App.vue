@@ -11,6 +11,8 @@
 
     <!-- Booking Modal (Global) -->
     <BookingFlow :is-open="appStore.isBookingModalOpen" @close="appStore.closeBookingModal()" />
+    
+    <AppFooter />
   </div>
 </template>
 
@@ -22,6 +24,7 @@ import { useAppStore } from '@/stores'
 
 import SplashScreen from '@/components/ui/SplashScreen.vue'
 import BookingFlow from '@/components/booking/BookingFlow.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 
 // Инициализация smooth scroll
 useSmoothScroll()

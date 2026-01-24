@@ -50,12 +50,28 @@ export const useAppStore = defineStore('app', () => {
     isScrolled.value = scrolled
   }
 
+  // Cart
+  const isCartOpen = ref(false)
+  const openCart = () => {
+    isCartOpen.value = true
+    document.body.style.overflow = 'hidden'
+  }
+  const closeCart = () => {
+    isCartOpen.value = false
+    document.body.style.overflow = ''
+  }
+  const toggleCart = () => {
+    if (isCartOpen.value) closeCart()
+    else openCart()
+  }
+
   return {
     // State
     isMobileMenuOpen,
     isBookingModalOpen,
     scrollProgress,
     isScrolled,
+    isCartOpen, // New
 
     // Actions
     toggleMobileMenu,
@@ -64,6 +80,9 @@ export const useAppStore = defineStore('app', () => {
     closeBookingModal,
     updateScrollProgress,
     setScrolled,
+    openCart, // New
+    closeCart, // New
+    toggleCart // New
   }
 })
 

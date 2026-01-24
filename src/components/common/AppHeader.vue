@@ -62,7 +62,24 @@
                  Войти
                </RouterLink>
             </template>
+
           </div>
+
+          <!-- Cart Button -->
+          <button 
+            @click="appStore.openCart()"
+            class="hidden md:flex relative p-2 text-white/80 hover:text-gold-500 transition-colors mr-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span 
+              v-if="cartStore.totalItems > 0"
+              class="absolute -top-1 -right-1 bg-m19-gold text-dark text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center"
+            >
+              {{ cartStore.totalItems }}
+            </span>
+          </button>
 
           <BaseButton
             variant="primary"
@@ -154,12 +171,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useAppStore, useAuthStore } from '@/stores'
+import { useAppStore, useAuthStore, useCartStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 const { isMobileMenuOpen } = storeToRefs(appStore)
 const { isAuthenticated } = storeToRefs(authStore)
 const { toggleMobileMenu, closeMobileMenu, openBookingModal } = appStore

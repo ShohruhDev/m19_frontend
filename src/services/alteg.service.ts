@@ -351,6 +351,57 @@ class AltegIntegrationService {
       return []
     }
   }
+
+
+  // --- E-commerce Methods ---
+
+  /**
+   * Получить список товаров (косметика)
+   */
+  async fetchGoods(params: any = {}): Promise<any[]> {
+    try {
+      const response = await httpClient.get<any>(`${this.endpoint}/goods`, { params })
+      const data = response.data?.data
+      // Altegio often returns wrapped { success: true, data: [...] } inside proxy response
+      if (data && !Array.isArray(data) && Array.isArray(data.data)) {
+        return data.data
+      }
+      return Array.isArray(data) ? data : []
+    } catch (error) {
+      console.error('Error fetching goods:', error)
+      throw new Error('Не удалось загрузить товары')
+    }
+  }
+
+  /**
+   * Получить категории товаров
+   */
+  async fetchGoodsCategories(): Promise<any[]> {
+    try {
+      const response = await httpClient.get<any>(`${this.endpoint}/goods/categories`)
+      const data = response.data?.data
+      if (data && !Array.isArray(data) && Array.isArray(data.data)) {
+        return data.data
+      }
+      return Array.isArray(data) ? data : []
+    } catch (error) {
+      console.error('Error fetching goods categories:', error)
+      return []
+    }
+  }
+
+  /**
+   * Создать заказ (оформить как запись с комментарием)
+   */
+  async createOrder(orderData: any): Promise<any> {
+    try {
+      const response = await httpClient.post<any>(`${this.endpoint}/orders`, orderData)
+      return response.data
+    } catch (error) {
+      console.error('Error creating order:', error)
+      throw new Error('Не удалось оформить заказ')
+    }
+  }
 }
 
 export const altegService = new AltegIntegrationService()

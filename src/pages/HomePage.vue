@@ -176,76 +176,21 @@
       <!-- Contact Section -->
       <ContactSection />
 
-      <!-- Footer -->
-      <footer class="bg-dark-100 border-t border-white/10 py-12">
-        <div class="container-custom">
-          <div class="grid md:grid-cols-4 gap-8">
-            <div class="space-y-4">
-              <!-- Logo in Footer -->
-              <div class="flex items-center gap-3">
-                <img src="@/assets/logo.png" alt="M19 Logo" class="h-12 w-auto object-contain" />
-              </div>
-              
-              <h3 class="text-2xl font-heading font-bold text-white">{{ BARBERSHOP_INFO.shortName }}</h3>
-              <p class="text-white/50 text-sm">
-                {{ BARBERSHOP_INFO.tagline }}
-              </p>
-              <div class="flex gap-4 mt-4">
-                <a :href="BARBERSHOP_INFO.social.instagram" target="_blank" class="text-white/50 hover:text-primary transition-colors">
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div>
-              <h4 class="font-heading font-semibold text-white mb-4">Навигация</h4>
-              <ul class="space-y-2 text-sm text-white/50">
-                <li><RouterLink to="/" class="hover:text-primary transition-colors">Главная</RouterLink></li>
-                <li><RouterLink to="/services" class="hover:text-primary transition-colors">Услуги</RouterLink></li>
-                <li><RouterLink to="/staff" class="hover:text-primary transition-colors">Мастера</RouterLink></li>
-                <li><RouterLink to="/reviews" class="hover:text-primary transition-colors">Отзывы</RouterLink></li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="font-heading font-semibold text-white mb-4">Контакты</h4>
-              <ul class="space-y-2 text-sm text-white/50">
-                <li>
-                  <a :href="BARBERSHOP_INFO.contact.phoneLink" class="hover:text-primary transition-colors">
-                    {{ BARBERSHOP_INFO.contact.phoneDisplay }}
-                  </a>
-                </li>
-                <li>{{ BARBERSHOP_INFO.contact.email }}</li>
-                <li>{{ BARBERSHOP_INFO.address.street }}</li>
-                <li>{{ BARBERSHOP_INFO.address.city }}, {{ BARBERSHOP_INFO.address.metro }}</li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="font-heading font-semibold text-white mb-4">Режим работы</h4>
-              <ul class="space-y-2 text-sm text-white/50">
-                <li>{{ BARBERSHOP_INFO.workingHours.display }}</li>
-              </ul>
-            </div>
-          </div>
-          <div class="mt-12 pt-8 border-t border-white/10 text-center text-sm text-white/30">
-            © 2026 {{ BARBERSHOP_INFO.name }}. Все права защищены.
-          </div>
-        </div>
-      </footer>
+
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+
 import { useBookingFlow } from '@/composables'
 import { useAppStore, useBookingStore } from '@/stores'
 import AppHeader from '@/components/common/AppHeader.vue'
 import HeroSection from '@/components/sections/HeroSection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import { BARBERSHOP_INFO, FEATURES } from '@/data/m19-data'
+import { FEATURES } from '@/data/m19-data'
 import { altegService } from '@/services'
 import type { AltegStaff, AltegService } from '@/types'
 

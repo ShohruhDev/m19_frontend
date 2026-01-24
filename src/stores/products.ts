@@ -5,230 +5,115 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Product, ProductInsert, ProductUpdate, ProductFilters } from '@/types/database.types'
-import * as productsService from '@/services/products.service'
+import { altegService } from '@/services/alteg.service'
 import { formatErrorMessage } from '@/utils/errorHandler'
+
+// Interface based on Altegio Goods (Mixed: Category or Item)
+export interface CatalogItem {
+  id: number
+  title: string
+  is_category: boolean
+  is_item: boolean // or !is_category
+  price: number // 0 for category
+  image_url?: string // from image
+  description?: string
+  parent_id: number
+  category_id: number
+  amount?: number // stock
+  category_name?: string // Added for filtering
+}
 
 export const useProductsStore = defineStore('products', () => {
   // State
-  const products = ref<Product[]>([])
-  const currentProduct = ref<Product | null>(null)
+  const items = ref<CatalogItem[]>([]) // All items flattened
+  const categories = ref<string[]>([]) // List of category names
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const lastFetch = ref<number>(0)
-
-  // Cache duration (5 minutes)
-  const CACHE_DURATION = 5 * 60 * 1000
 
   // Computed
-  const activeProducts = computed(() =>
-    products.value.filter(p => p.active)
-  )
-
-  const productsByCategory = computed(() => {
-    const grouped: Record<string, Product[]> = {}
-    products.value.forEach(product => {
-      const category = product.category || 'Прочее'
-      if (!grouped[category]) {
-        grouped[category] = []
-      }
-      grouped[category].push(product)
-    })
-    return grouped
-  })
-
-  const isDataStale = computed(() => {
-    return Date.now() - lastFetch.value > CACHE_DURATION
-  })
+  // Only items (products), ignoring folders
+  const products = computed(() => items.value.filter(i => i.is_item))
 
   // Actions
-  async function fetchProducts(filters: ProductFilters = {}, forceRefresh = false) {
-    // Если данные свежие и не требуется принудительное обновление
-    if (!forceRefresh && products.value.length > 0 && !isDataStale.value) {
-      return
-    }
-
+  async function fetchAllProducts() {
     loading.value = true
     error.value = null
+    const allItems: CatalogItem[] = []
+    const catNames = new Set<string>()
 
-    const response = await productsService.listProducts(filters)
+    try {
+      // 1. Fetch Root
+      const rootGoods = await altegService.fetchGoods({ parent_id: 0 })
 
-    if (response.error) {
-      error.value = formatErrorMessage(response.error)
-      loading.value = false
-      return
-    }
+      // Process Root
+      for (const node of rootGoods) {
+        // Correctly handle is_category flag (string/bool/int)
+        const isCat = node.is_category === true || node.is_category === 'true' || node.is_category === 1
 
-    products.value = response.data || []
-    lastFetch.value = Date.now()
-    loading.value = false
-  }
+        if (isCat) {
+          // It is a Folder/Brand. Add to categories list.
+          catNames.add(node.title)
 
-  async function fetchProduct(id: string) {
-    loading.value = true
-    error.value = null
+          try {
+            // 2. Fetch Children (One level deep recursion for now)
+            // If we need deeper, we'd need a recursive function.
+            // Usually cosmetics catalog is Brand -> Product.
+            const children = await altegService.fetchGoods({ parent_id: node.category_id || node.id })
 
-    const response = await productsService.getProduct(id)
-
-    if (response.error) {
-      error.value = formatErrorMessage(response.error)
-      currentProduct.value = null
-      loading.value = false
-      return
-    }
-
-    currentProduct.value = response.data
-    loading.value = false
-  }
-
-  async function createProduct(productData: ProductInsert) {
-    loading.value = true
-    error.value = null
-
-    const response = await productsService.createProduct(productData)
-
-    if (response.error) {
-      error.value = formatErrorMessage(response.error)
-      loading.value = false
-      return null
-    }
-
-    // Optimistic UI - добавляем сразу в список
-    if (response.data) {
-      products.value.unshift(response.data)
-    }
-
-    loading.value = false
-    return response.data
-  }
-
-  async function updateProduct(id: string, updates: ProductUpdate) {
-    loading.value = true
-    error.value = null
-
-    // Optimistic UI - обновляем локально
-    const index = products.value.findIndex(p => p.id === id)
-    const originalProduct = index >= 0 ? { ...products.value[index] } : null
-
-    if (index >= 0) {
-      products.value[index] = { ...products.value[index], ...updates }
-    }
-
-    const response = await productsService.updateProduct(id, updates)
-
-    if (response.error) {
-      // Откатываем изменения при ошибке
-      if (originalProduct && index >= 0) {
-        products.value[index] = originalProduct
+            children.forEach((child: any) => {
+              const isChildCat = child.is_category === true || child.is_category === 'true' || child.is_category === 1
+              if (!isChildCat) {
+                allItems.push(mapToItem(child, node.title))
+              }
+            })
+          } catch (e) {
+            console.error(`Failed to fetch children for ${node.title}`, e)
+          }
+        } else {
+          // Root level product
+          allItems.push(mapToItem(node, 'Прочее'))
+        }
       }
-      error.value = formatErrorMessage(response.error)
+
+      items.value = allItems
+      categories.value = Array.from(catNames)
+    } catch (err: any) {
+      error.value = formatErrorMessage(err)
+      console.error(err)
+    } finally {
       loading.value = false
-      return null
     }
-
-    // Обновляем с данными с сервера
-    if (response.data && index >= 0) {
-      products.value[index] = response.data
-    }
-
-    loading.value = false
-    return response.data
   }
 
-  async function deleteProduct(id: string) {
-    loading.value = true
-    error.value = null
-
-    const response = await productsService.deleteProduct(id)
-
-    if (response.error) {
-      error.value = formatErrorMessage(response.error)
-      loading.value = false
-      return false
+  function mapToItem(g: any, categoryName: string): CatalogItem {
+    return {
+      id: g.id || g.category_id,
+      title: g.title,
+      is_category: false,
+      is_item: true,
+      price: g.price_min || g.price || 0,
+      image_url: g.image || g.image_url || '',
+      description: g.description || '',
+      parent_id: g.parent_id || 0,
+      category_id: g.category_id,
+      amount: g.amount,
+      category_name: categoryName
     }
-
-    // Удаляем из списка (или помечаем как неактивный)
-    const index = products.value.findIndex(p => p.id === id)
-    if (index >= 0) {
-      products.value[index].active = false
-    }
-
-    loading.value = false
-    return true
-  }
-
-  async function updateStock(id: string, quantity: number) {
-    const response = await productsService.updateStock(id, quantity)
-
-    if (response.error) {
-      error.value = formatErrorMessage(response.error)
-      return null
-    }
-
-    // Обновляем в списке
-    const index = products.value.findIndex(p => p.id === id)
-    if (index >= 0 && response.data) {
-      products.value[index] = response.data
-    }
-
-    return response.data
-  }
-
-  async function searchProducts(searchTerm: string) {
-    loading.value = true
-    error.value = null
-
-    const response = await productsService.searchProducts(searchTerm)
-
-    if (response.error) {
-      error.value = formatErrorMessage(response.error)
-      loading.value = false
-      return []
-    }
-
-    loading.value = false
-    return response.data || []
-  }
-
-  function clearError() {
-    error.value = null
-  }
-
-  async function refresh() {
-    await fetchProducts({}, true)
   }
 
   function $reset() {
-    products.value = []
-    currentProduct.value = null
+    items.value = []
     loading.value = false
     error.value = null
-    lastFetch.value = 0
   }
 
   return {
-    // State
+    items,
     products,
-    currentProduct,
+    categories,
     loading,
     error,
-
-    // Computed
-    activeProducts,
-    productsByCategory,
-    isDataStale,
-
-    // Actions
-    fetchProducts,
-    fetchProduct,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    updateStock,
-    searchProducts,
-    clearError,
-    refresh,
-    $reset,
+    fetchAllProducts,
+    $reset
   }
 })
-
