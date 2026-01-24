@@ -42,7 +42,7 @@
 
               <div class="flex items-end justify-between pt-4 border-t border-white/10">
                 <div>
-                  <div class="text-2xl font-bold text-gold-500">{{ product.price }} ₽</div>
+                  <div class="text-2xl font-bold text-gold-500">{{ product.price }} сум</div>
                   <div
                     v-if="product.inStock"
                     class="text-xs text-green-400 mt-1"
@@ -81,7 +81,7 @@
           <div>
             <div class="text-sm text-gold-500">{{ selectedProduct.brand }}</div>
             <div class="font-heading font-semibold text-white">{{ selectedProduct.title }}</div>
-            <div class="text-gold-500 font-bold mt-1">{{ selectedProduct.price }} ₽</div>
+            <div class="text-gold-500 font-bold mt-1">{{ selectedProduct.price }} сум</div>
           </div>
         </div>
 

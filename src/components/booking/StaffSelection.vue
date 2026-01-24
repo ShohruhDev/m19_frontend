@@ -14,21 +14,6 @@
 
     <ScrollArea v-else class="h-[400px] pr-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Any Master Option -->
-        <SelectableCard
-          :is-selected="selectedStaff === null"
-          @click="selectStaff(null)"
-          class="p-4 flex flex-col items-center justify-center text-center h-full min-h-[160px]"
-        >
-          <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-3">
-            <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          </div>
-          <h3 class="font-heading font-medium text-foreground">Любой мастер</h3>
-          <p class="text-xs text-muted-foreground mt-1">Подберем ближайшее время</p>
-        </SelectableCard>
-
         <!-- Staff List (Filtered) -->
         <SelectableCard
           v-for="member in filteredStaff"
@@ -59,13 +44,17 @@
           </div>
 
           <!-- Quick Availablity Chips -->
-          <div v-if="member.next_slots && member.next_slots.length > 0" class="w-full flex gap-1 overflow-x-auto pb-1 no-scrollbar justify-center">
-            <div 
-              v-for="slot in member.next_slots" 
-              :key="slot.datetime"
-              class="shrink-0 px-2 py-1 rounded bg-secondary text-[10px] text-secondary-foreground whitespace-nowrap border border-border/50"
-            >
-              {{ slot.time }}
+          <div v-if="member.next_slots && member.next_slots.length > 0" class="w-full flex flex-col gap-1.5">
+            <span class="text-[10px] text-muted-foreground">Ближайшее время:</span>
+            <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar justify-center">
+              <button 
+                v-for="slot in member.next_slots" 
+                :key="slot.date + slot.time"
+                class="shrink-0 px-2 py-1 rounded bg-primary/10 hover:bg-primary/20 text-[10px] text-primary font-medium whitespace-nowrap border border-primary/30 transition-colors"
+                @click.stop="quickBook(member, slot)"
+              >
+                {{ formatSlotLabel(slot) }}
+              </button>
             </div>
           </div>
           <div v-else class="text-[10px] text-muted-foreground">
@@ -93,6 +82,9 @@ const {
   error,
   loadStaff,
   selectStaff: selectStaffAction,
+  selectDate,
+  selectTime,
+  nextStep,
 } = useBookingFlow()
 
 const filteredStaff = computed(() => {
@@ -114,10 +106,40 @@ const selectStaff = (member: AltegStaff | null) => {
   }
 }
 
+const quickBook = (member: AltegStaff, slot: any) => {
+  // Select the staff member
+  selectStaffAction(member)
+  
+  // Select the date
+  selectDate(slot.date)
+  
+  // Select the time slot
+  const timeSlot = {
+    time: slot.time,
+    datetime: `${slot.date}T${slot.time}:00`,
+    available: true,
+    staff_id: member.id
+  }
+  selectTime(timeSlot)
+  
+  // Move to next step (confirmation)
+  nextStep()
+  nextStep() // Skip time selection since we already selected time
+}
+
+const formatSlotLabel = (slot: any) => {
+  const todayStr = new Date().toISOString().split('T')[0]
+  const tomorrowDate = new Date()
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowStr = tomorrowDate.toISOString().split('T')[0]
+  
+  const dateLabel = slot.date === todayStr ? 'Сегодня' : slot.date === tomorrowStr ? 'Завтра' : slot.date.slice(5)
+  return `${dateLabel} ${slot.time}`
+}
+
 onMounted(() => {
   if (staff.value.length === 0) {
     loadStaff()
   }
 })
 </script>
-

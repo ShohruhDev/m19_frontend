@@ -50,6 +50,20 @@
 
         <!-- CTA Button + Mobile Menu -->
         <div class="flex items-center gap-4">
+          <!-- Auth Links (Desktop) -->
+          <div class="hidden lg:flex items-center gap-4 mr-2">
+            <template v-if="isAuthenticated">
+              <RouterLink to="/profile" class="text-white/80 hover:text-gold-500 font-medium transition-colors">
+                Кабинет
+              </RouterLink>
+            </template>
+            <template v-else>
+               <RouterLink to="/login" class="text-white/80 hover:text-gold-500 font-medium transition-colors">
+                 Войти
+               </RouterLink>
+            </template>
+          </div>
+
           <BaseButton
             variant="primary"
             size="md"
@@ -108,6 +122,20 @@
               {{ item.name }}
             </a>
           </RouterLink>
+          
+          <!-- Mobile Auth Link -->
+          <div class="py-2 border-l-2 pl-4 border-transparent">
+             <template v-if="isAuthenticated">
+                <RouterLink to="/profile" class="block text-lg font-heading font-medium text-white/70 hover:text-gold-500" @click="closeMobileMenu">
+                  Личный кабинет
+                </RouterLink>
+             </template>
+             <template v-else>
+                <RouterLink to="/login" class="block text-lg font-heading font-medium text-white/70 hover:text-gold-500" @click="closeMobileMenu">
+                  Войти
+                </RouterLink>
+             </template>
+          </div>
 
           <BaseButton
             variant="primary"
@@ -126,12 +154,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useAppStore } from '@/stores'
+import { useAppStore, useAuthStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
 const appStore = useAppStore()
+const authStore = useAuthStore()
 const { isMobileMenuOpen } = storeToRefs(appStore)
+const { isAuthenticated } = storeToRefs(authStore)
 const { toggleMobileMenu, closeMobileMenu, openBookingModal } = appStore
 
 const isScrolled = ref(false)

@@ -24,12 +24,14 @@
       </DialogHeader>
 
       <!-- Main Content Area -->
-      <div class="p-6 min-h-[400px] max-h-[60vh] overflow-y-auto scrollbar-custom bg-background relative">
+      <div 
+        class="p-6 min-h-[400px] max-h-[60vh] overflow-y-auto scrollbar-custom bg-background relative"
+        @wheel.stop
+      >
         <Transition :name="transitionName" mode="out-in">
           <div :key="currentStep" class="booking-step">
             <ServiceSelection v-if="currentStep === 'service'" />
             <StaffSelection v-else-if="currentStep === 'staff'" />
-            <DateSelection v-else-if="currentStep === 'date'" />
             <TimeSelection v-else-if="currentStep === 'time'" />
             <BookingConfirmation
               v-else-if="currentStep === 'confirmation'"
@@ -106,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useBookingFlow } from '@/composables'
 import {
   Dialog,
@@ -118,7 +120,6 @@ import {
 import { Button } from '@/components/ui/button'
 import ServiceSelection from './ServiceSelection.vue'
 import StaffSelection from './StaffSelection.vue'
-import DateSelection from './DateSelection.vue'
 import TimeSelection from './TimeSelection.vue'
 import BookingConfirmation from './BookingConfirmation.vue'
 import BookingSummaryFooter from './BookingSummaryFooter.vue'
@@ -196,10 +197,28 @@ const formatDateTime = (datetime: string) => {
   })
 }
 
+// Lock body scroll when modal is open
+watch(
+  () => props.isOpen,
+  (isOpen) => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  },
+  { immediate: true }
+)
+
 onMounted(() => {
   if (props.isOpen) {
     loadServices()
   }
+})
+
+// Cleanup: restore body scroll on unmount
+onUnmounted(() => {
+  document.body.style.overflow = ''
 })
 </script>
 

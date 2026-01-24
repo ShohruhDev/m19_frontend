@@ -68,7 +68,7 @@
                       <div class="flex items-center gap-4 text-sm text-white/50">
                         <span class="flex items-center gap-1">
                           <Clock class="w-4 h-4" />
-                          {{ formatDuration(service.duration) }}
+                          {{ formatDuration(getServiceDuration(service)) }}
                         </span>
                       </div>
                     </div>
@@ -99,6 +99,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useBookingFlow } from '@/composables'
 import AppHeader from '@/components/common/AppHeader.vue'
 import BookingFlow from '@/components/booking/BookingFlow.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -186,17 +187,24 @@ const fetchCategories = async () => {
   }
 }
 
-const bookService = (_service: AltegService) => {
+const { initializeBooking } = useBookingFlow()
+
+const bookService = (service: AltegService) => {
+  initializeBooking({ service })
   isBookingOpen.value = true
+}
+
+// Helper to get service duration from staff array
+const getServiceDuration = (service: AltegService): number => {
+  // seance_length is in seconds, get from first staff member
+  return service.staff?.[0]?.seance_length || 0
 }
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('uz-UZ', {
-    style: 'currency',
-    currency: 'UZS',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price)
+  }).format(price) + ' сум'
 }
 
 const formatDuration = (seconds: number) => {

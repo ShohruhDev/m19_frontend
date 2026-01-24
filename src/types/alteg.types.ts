@@ -9,10 +9,14 @@ export interface AltegService {
   description?: string
   price_min: number
   price_max: number
-  duration: number // в минутах
+  duration: number // в минутах (обычно 0, не используется)
   category_id?: number
   image_url?: string
   popularity?: number
+  staff?: Array<{
+    id: number
+    seance_length: number // длительность в секундах
+  }>
 }
 
 export interface AltegServiceCategory {
@@ -42,6 +46,7 @@ export interface AltegScheduleSlot {
   datetime: string // ISO 8601
   available: boolean
   staff_id: number | string
+  staff_name?: string // Имя мастера (для режима "Все специалисты")
 }
 
 export interface AltegAvailableDate {
@@ -53,6 +58,7 @@ export interface AltegBookingPayload {
   service_id: number | string
   staff_id: number | string
   datetime: string // ISO 8601
+  notify_by_sms?: number // hours
   client: {
     name: string
     phone: string

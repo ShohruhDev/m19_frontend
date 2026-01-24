@@ -15,56 +15,81 @@
       <Button variant="outline" class="mt-4" @click="loadServices">Попробовать снова</Button>
     </div>
 
-    <ScrollArea v-else class="h-[400px] pr-4">
-      <div class="grid gap-3">
-        <SelectableCard
-          v-for="service in services"
-          :key="service.id"
-          :is-selected="selectedService?.id === service.id"
-          @click="selectService(service)"
-          class="p-4"
+    <div 
+      v-else 
+      class="max-h-[500px] overflow-y-auto pr-4 scrollbar-custom"
+      @wheel.stop
+    >
+      <div class="space-y-3">
+        <Collapsible
+          v-for="(category, index) in categories"
+          :key="category.id"
+          v-model:open="isOpenState[index]"
+          class="group/collapsible"
         >
-          <div class="flex justify-between items-start gap-4">
-            <div class="flex-1 min-w-0">
-              <h3 class="font-heading font-medium text-foreground mb-1 truncate">
-                {{ service.title }}
-              </h3>
-              <p v-if="service.description" class="text-muted-foreground text-sm mb-2 line-clamp-2">
-                {{ service.description }}
-              </p>
-              <div class="flex items-center gap-3 text-xs text-muted-foreground">
-                <span class="flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {{ formatDuration(service.duration) }}
-                </span>
-              </div>
+          <CollapsibleTrigger class="w-full flex items-center justify-between p-4 bg-secondary/50 border border-border rounded-lg hover:border-primary/50 hover:bg-secondary transition-all duration-300 cursor-pointer text-left">
+            <h3 class="text-base font-heading font-semibold text-foreground group-hover/collapsible:text-primary transition-colors">
+              {{ category.title }}
+            </h3>
+            <ChevronDown 
+              class="w-5 h-5 text-primary transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" 
+            />
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <div class="pt-3 grid gap-2">
+              <SelectableCard
+                v-for="service in category.services"
+                :key="service.id"
+                :is-selected="selectedService?.id === service.id"
+                @click="selectService(service)"
+                class="p-4"
+              >
+                <div class="flex justify-between items-start gap-4">
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-heading font-medium text-foreground mb-1 truncate">
+                      {{ service.title }}
+                    </h4>
+                    <p v-if="service.description" class="text-muted-foreground text-sm mb-2 line-clamp-2">
+                      {{ service.description }}
+                    </p>
+                    <div class="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span class="flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ formatDuration(getServiceDuration(service)) }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="text-right shrink-0">
+                    <div class="font-bold text-primary text-lg">
+                      {{ formatPrice(service.price_min) }}
+                    </div>
+                    <div v-if="service.price_max && service.price_max !== service.price_min" class="text-xs text-muted-foreground">
+                      до {{ formatPrice(service.price_max) }}
+                    </div>
+                  </div>
+                </div>
+              </SelectableCard>
             </div>
-            
-            <div class="text-right shrink-0">
-              <div class="font-bold text-primary text-lg">
-                {{ formatPrice(service.price_min) }}
-              </div>
-              <div v-if="service.price_max && service.price_max !== service.price_min" class="text-xs text-muted-foreground">
-                до {{ formatPrice(service.price_max) }}
-              </div>
-            </div>
-          </div>
-        </SelectableCard>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
-    </ScrollArea>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useBookingFlow } from '@/composables'
 import SelectableCard from '@/components/ui/SelectableCard.vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import type { AltegService } from '@/types'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-vue-next'
+import type { AltegService, AltegServiceCategory } from '@/types'
 
 const {
   services,
@@ -75,17 +100,90 @@ const {
   selectService: selectServiceAction,
 } = useBookingFlow()
 
+// State for collapsibles
+const isOpenState = ref<boolean[]>([])
+
+// Group services by category
+const categories = computed(() => {
+  if (!services.value || services.value.length === 0) return []
+
+  // Group services by category_id
+  const groupedServices: Record<number, AltegService[]> = {}
+  services.value.forEach(service => {
+    const catId = service.category_id || 0
+    if (!groupedServices[catId]) {
+      groupedServices[catId] = []
+    }
+    groupedServices[catId].push(service)
+  })
+
+  // Map groups to categories with titles based on heuristics
+  const mappedCategories: AltegServiceCategory[] = []
+  
+  const getCategoryTitle = (services: AltegService[]): string => {
+    const hitSales = services.find(s => s.title.includes('ХИТ ПРОДАЖ'))
+    if (hitSales) {
+      if (hitSales.price_min > 480000) return 'Индивидуальное обслуживание в VIP Room'
+      if (hitSales.price_min > 400000) return 'Профессиональный барбер в общем зале'
+    }
+    const haircut = services.find(s => s.title.includes('Классическая стрижка'))
+    if (haircut) {
+       if (haircut.price_min > 200000) return 'Индивидуальное обслуживание в VIP Room'
+       return 'Профессиональный барбер в общем зале'
+    }
+    return 'Услуги'
+  }
+
+  Object.entries(groupedServices).forEach(([idStr, services]) => {
+    const id = parseInt(idStr)
+    if (services.length > 0) {
+      const title = getCategoryTitle(services)
+      
+      // Check if category with this title already exists
+      const existingCategory = mappedCategories.find(c => c.title === title)
+      
+      if (existingCategory) {
+        // Merge services into existing category
+        existingCategory.services.push(...services)
+      } else {
+        mappedCategories.push({
+          id,
+          title,
+          services
+        })
+      }
+    }
+  })
+
+  mappedCategories.sort((a, b) => {
+    if (a.title.includes('VIP')) return 1
+    if (b.title.includes('VIP')) return -1
+    return 0
+  })
+
+  // Initialize collapsible states - all closed by default
+  if (isOpenState.value.length !== mappedCategories.length) {
+    isOpenState.value = mappedCategories.map(() => false)
+  }
+
+  return mappedCategories
+})
+
 const selectService = (service: AltegService) => {
   selectServiceAction(service)
 }
 
+// Helper to get service duration from staff array
+const getServiceDuration = (service: AltegService): number => {
+  // seance_length is in seconds, get from first staff member
+  return service.staff?.[0]?.seance_length || 0
+}
+
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('uz-UZ', {
-    style: 'currency',
-    currency: 'UZS',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price)
+  }).format(price) + ' сум'
 }
 
 const formatDuration = (seconds: number) => {

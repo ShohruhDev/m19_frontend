@@ -7,4 +7,5 @@ export * from './booking.store'
 export * from './products'
 export * from './orders'
 export * from './reviews'
+export * from './auth.store'
 

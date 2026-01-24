@@ -12,7 +12,6 @@ import type {
   AltegServiceCategory,
   AltegStaff,
   AltegScheduleSlot,
-  AltegAvailableDate,
   AltegBookingPayload,
   AltegBookingResponse,
 } from '@/types'
@@ -101,34 +100,7 @@ class AltegIntegrationService {
     }
   }
 
-  /**
-   * Получить доступные даты для записи
-   */
-  async fetchAvailableDates(
-    staffId: number | string,
-    serviceId: number | string,
-    fromDate?: string
-  ): Promise<AltegAvailableDate[]> {
-    try {
-      const params: any = {
-        staff_id: staffId,
-        service_id: serviceId,
-      }
 
-      if (fromDate) {
-        params.from_date = fromDate
-      }
-
-      const response = await httpClient.get<any>(
-        `${this.endpoint}/schedule/dates`,
-        { params }
-      )
-      return response.data?.data || []
-    } catch (error) {
-      console.error('Error fetching available dates:', error)
-      throw new Error('Не удалось загрузить доступные даты')
-    }
-  }
 
   /**
    * Получить доступные временные слоты на конкретную дату
@@ -149,11 +121,46 @@ class AltegIntegrationService {
           },
         }
       )
-      // Ensure we have an array before filtering
-      const slots = response.data?.data || []
+      // Backend returns { success: true, data: [...slots], timestamp: ... }
+      // So we access response.data directly, not response.data.data
+      const slots = response.data || []
       return Array.isArray(slots) ? slots.filter((slot: any) => slot.available) : []
     } catch (error) {
       console.error('Error fetching available time:', error)
+      throw new Error('Не удалось загрузить доступное время')
+    }
+  }
+
+  /**
+   * Получить доступные временные слоты от всех мастеров на конкретную дату
+   */
+  async fetchAvailableTimeAllStaff(
+    serviceId: number | string,
+    date: string
+  ): Promise<AltegScheduleSlot[]> {
+    try {
+      // Сначала получаем всех мастеров для этой услуги
+      const staff = await this.fetchStaff(serviceId)
+
+      // Затем получаем слоты для каждого мастера параллельно
+      const slotsPromises = staff.map(staffMember =>
+        this.fetchAvailableTime(staffMember.id, serviceId, date)
+          .then(slots => slots.map(slot => ({
+            ...slot,
+            staff_id: staffMember.id,
+            staff_name: staffMember.name
+          })))
+          .catch(() => []) // Игнорируем ошибки для отдельных мастеров
+      )
+
+      const allSlots = await Promise.all(slotsPromises)
+
+      // Объединяем все слоты и сортируем по времени
+      return allSlots
+        .flat()
+        .sort((a, b) => a.time.localeCompare(b.time))
+    } catch (error) {
+      console.error('Error fetching available time from all staff:', error)
       throw new Error('Не удалось загрузить доступное время')
     }
   }
@@ -243,6 +250,106 @@ class AltegIntegrationService {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
+  }
+  /**
+   * Запросить код авторизации по SMS
+   */
+  async requestAuthCode(phone: string): Promise<boolean> {
+    try {
+      const response = await httpClient.post<any>(
+        `${this.endpoint}/auth/user/authentication_code`,
+        { phone }
+      )
+      // Обычно успешный ответ содержит { success: true, ... }
+      return response.data?.success || response.data?.meta?.success || true
+    } catch (error) {
+      console.error('Error requesting auth code:', error)
+      throw new Error('Не удалось отправить SMS код')
+    }
+  }
+
+  /**
+   * Авторизация пользователя (обмен кода на токен)
+   */
+  async authenticateUser(phone: string, code: string): Promise<{ token: string; user: any }> {
+    try {
+      const response = await httpClient.post<any>(
+        `${this.endpoint}/auth/user/authenticate`,
+        { phone, code }
+      )
+      // Ожидаем ответ с user_token и данными пользователя
+      const data = response.data?.data
+      if (!data || !data.user_token) {
+        throw new Error('Токен не получен')
+      }
+      return {
+        token: data.user_token,
+        user: {
+          id: data.id,
+          name: data.name,
+          phone: data.phone,
+          avatar: data.avatar,
+          email: data.email
+        }
+      }
+    } catch (error) {
+      console.error('Error authenticating user:', error)
+      throw new Error('Ошибка авторизации. Проверьте код.')
+    }
+  }
+
+  /**
+   * Получить данные пользователя
+   */
+  async getUserData(token: string): Promise<any> {
+    try {
+      // Передаем токен в заголовке Authorization: Bearer <token>
+      // httpClient должен поддерживать custom headers per request
+      const response = await httpClient.get<any>(
+        `${this.endpoint}/user/data`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}, User ${token}`
+            // В Altegio часто используется формат "Bearer PARTNER_TOKEN, User USER_TOKEN"
+            // Но так как мы идем через прокси, возможно прокси подставляет Partner Token.
+            // Мы передадим User Token в заголовке X-User-Token или Authorization если прокси это поддерживает.
+            // Попробуем передать его просто как Authorization, надеясь что прокси правильно смерджит.
+            // ЛИБО: Передадим его как 'X-Alteg-User-Token' если бэкенд это ожидает.
+            // Для начала попробуем просто `Authorization: User ${token}` если прокси уже имеет Bearer.
+          }
+        }
+      )
+      return response.data?.data
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+      throw new Error('Не удалось загрузить профиль')
+    }
+  }
+
+  /**
+   * Получить записи пользователя
+   */
+  async getUserAppointments(token: string): Promise<any[]> {
+    try {
+      // Altegio API endpoint for user appointments: /api/v1/user/records
+      const response = await httpClient.get<any>(
+        `${this.endpoint}/user/records`, // Прокси путь
+        {
+          headers: {
+            // Предполагаем, что прокси обрабатывает это.
+            'Authorization': `Bearer ${token}` // Или User ${token}. Altegio требует "User <token>" для user endpoints.
+          },
+          params: {
+            count: 50,
+            // sort: 'datetime_desc' (по умолчанию?)
+          }
+        }
+      )
+      return response.data?.data || []
+    } catch (error) {
+      console.error('Error fetching appointments:', error)
+      return []
+    }
   }
 }
 

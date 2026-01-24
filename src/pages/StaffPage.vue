@@ -101,6 +101,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useBookingFlow } from '@/composables'
 import AppHeader from '@/components/common/AppHeader.vue'
 import BookingFlow from '@/components/booking/BookingFlow.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -111,6 +112,8 @@ const isBookingOpen = ref(false)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 const staffMembers = ref<any[]>([])
+
+const { initializeBooking } = useBookingFlow()
 
 // Helper to strip HTML tags
 const stripHtml = (html: string) => {
@@ -150,8 +153,11 @@ const fetchStaff = async () => {
   }
 }
 
-const bookWithMaster = (_master: any) => {
-  // In a future update we could pre-select the master
+const bookWithMaster = (master: any) => {
+  // Находим оригинальный объект AltegStaff, так как мы его трансформировали для отображения
+  // В данном случае объект уже содержит необходимые поля, но для типизации
+  // передадим его как AltegStaff.
+  initializeBooking({ staff: master })
   isBookingOpen.value = true
 }
 

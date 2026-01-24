@@ -61,7 +61,7 @@
               </p>
               <div class="flex items-end justify-between mt-auto">
                 <span class="text-2xl font-bold text-primary">{{ formatPrice(service.price_min) }}</span>
-                <span class="text-white/50 text-sm">{{ formatDuration(service.duration) }}</span>
+                <span class="text-white/50 text-sm">{{ formatDuration(getServiceDuration(service)) }}</span>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
                   {{ master.name }}
                 </h3>
                 <p class="text-primary mb-4 text-sm">{{ master.specialization || 'Барбер' }}</p>
-                <div class="flex items-center gap-2 text-sm text-white/50">
+                <div class="flex items-center gap-2 text-sm text-white/50 mb-4">
                   <span class="flex items-center gap-1 text-yellow-500" v-if="master.rating">
                     <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -152,6 +152,15 @@
                   </span>
                   <span v-if="master.experience_years">{{ master.experience_years }} лет опыта</span>
                 </div>
+                
+                <BaseButton 
+                  variant="outline" 
+                  size="sm" 
+                  class="w-full"
+                  @click="bookMaster(master)"
+                >
+                  Записаться
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -230,6 +239,7 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useBookingFlow } from '@/composables'
 import { useAppStore, useBookingStore } from '@/stores'
 import AppHeader from '@/components/common/AppHeader.vue'
 import HeroSection from '@/components/sections/HeroSection.vue'
@@ -237,13 +247,19 @@ import ContactSection from '@/components/sections/ContactSection.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { BARBERSHOP_INFO, FEATURES } from '@/data/m19-data'
 import { altegService } from '@/services'
-import type { AltegStaff } from '@/types'
+import type { AltegStaff, AltegService } from '@/types'
 
 const appStore = useAppStore()
 const bookingStore = useBookingStore()
+const { initializeBooking } = useBookingFlow()
 
 const localStaff = ref<AltegStaff[]>([])
 const isMastersLoading = ref(false)
+
+const bookMaster = (master: AltegStaff) => {
+  initializeBooking({ staff: master })
+  appStore.openBookingModal()
+}
 
 // Computed for Services
 const featuredServices = computed(() => {
@@ -257,13 +273,16 @@ const featuredMasters = computed(() => {
 })
 
 // Formatting Helpers
+const getServiceDuration = (service: AltegService): number => {
+  // seance_length is in seconds, get from first staff member
+  return service.staff?.[0]?.seance_length || 0
+}
+
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('uz-UZ', {
-    style: 'currency',
-    currency: 'UZS',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price)
+  }).format(price) + ' сум'
 }
 
 const formatDuration = (seconds: number) => {

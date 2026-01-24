@@ -3,7 +3,7 @@
  * Типы для процесса онлайн-записи
  */
 
-export type BookingStep = 'service' | 'staff' | 'date' | 'time' | 'confirmation'
+export type BookingStep = 'service' | 'staff' | 'time' | 'confirmation'
 
 export interface BookingState {
   currentStep: BookingStep

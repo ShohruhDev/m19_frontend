@@ -10,7 +10,7 @@
           <div class="flex items-center gap-2 text-xs text-muted-foreground">
             <span>{{ formatPrice(selectedService.price_min) }}</span>
             <span class="w-1 h-1 rounded-full bg-border"></span>
-            <span>{{ formatDuration(selectedService.duration) }}</span>
+            <span>{{ formatDuration(getServiceDuration(selectedService)) }}</span>
           </div>
         </div>
         <div v-else class="text-sm text-muted-foreground">
@@ -65,19 +65,21 @@ const nextButtonText = computed(() => {
   switch (currentStep.value) {
     case 'service': return 'Выбрать мастера'
     case 'staff': return 'Выбрать время'
-    case 'date': return 'Выбрать время'
     case 'time': return 'Подтвердить'
     default: return 'Далее'
   }
 })
 
+const getServiceDuration = (service: any) => {
+  // seance_length is in seconds, get from first staff member
+  return service?.staff?.[0]?.seance_length || 0
+}
+
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
+  return new Intl.NumberFormat('uz-UZ', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price)
+  }).format(price) + ' сум'
 }
 
 const formatDuration = (seconds: number) => {

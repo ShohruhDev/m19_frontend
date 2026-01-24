@@ -19,7 +19,7 @@ import { ref, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import { useSmoothScroll } from '@/composables'
 import { useAppStore } from '@/stores'
-import ToastContainer from '@/components/ui/ToastContainer.vue'
+
 import SplashScreen from '@/components/ui/SplashScreen.vue'
 import BookingFlow from '@/components/booking/BookingFlow.vue'
 

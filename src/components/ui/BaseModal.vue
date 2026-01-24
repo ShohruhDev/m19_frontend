@@ -6,7 +6,6 @@
         sizeClasses,
         'p-0 gap-0 overflow-hidden'
       ]"
-      class="max-h-[90vh] overflow-y-auto scrollbar-custom"
     >
       <!-- Header -->
       <DialogHeader v-if="$slots.header" class="p-6 sm:p-8 border-b border-border">

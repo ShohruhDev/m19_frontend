@@ -20,12 +20,12 @@
         <!-- Мастер -->
         <div class="flex items-center gap-4 pb-6 border-b border-white/10">
           <Avatar class="h-16 w-16 border-2 border-border">
-            <AvatarImage v-if="selectedStaff?.avatar_url" :src="selectedStaff.avatar_url" :alt="selectedStaff.name" class="object-cover" />
-            <AvatarFallback class="text-xl font-bold bg-primary/20 text-primary">{{ selectedStaff?.name.charAt(0) }}</AvatarFallback>
+            <AvatarImage v-if="displayStaff?.avatar_url" :src="displayStaff.avatar_url" :alt="displayStaff.name" class="object-cover" />
+            <AvatarFallback class="text-xl font-bold bg-primary/20 text-primary">{{ displayStaff?.name?.charAt(0) || '?' }}</AvatarFallback>
           </Avatar>
           <div>
             <p class="text-sm text-muted-foreground mb-1">Мастер</p>
-            <p class="text-lg font-heading font-medium text-foreground">{{ selectedStaff?.name }}</p>
+            <p class="text-lg font-heading font-medium text-foreground">{{ displayStaff?.name || 'Любой доступный мастер' }}</p>
           </div>
         </div>
 
@@ -45,7 +45,7 @@
     <!-- Форма с данными клиента -->
     <form class="space-y-4" @submit.prevent="handleSubmit">
       <div class="grid gap-2">
-        <Label for="client-name">Ваше имя</Label>
+        <Label for="client-name">Ваше имя <span class="text-destructive">*</span></Label>
         <Input
           id="client-name"
           v-model="formData.name"
@@ -58,17 +58,33 @@
       </div>
 
       <div class="grid gap-2">
-        <Label for="client-phone">Телефон</Label>
+        <Label for="client-phone">Телефон <span class="text-destructive">*</span></Label>
         <Input
           id="client-phone"
           v-model="formData.phone"
           type="tel"
-          placeholder="+7 (___) ___-__-__"
+          placeholder="+998 (__) ___-__-__"
           :class="{'border-destructive': errors.phone}"
           required
           @blur="validatePhone"
         />
         <p v-if="errors.phone" class="text-sm text-destructive">{{ errors.phone }}</p>
+      </div>
+
+      <div class="grid gap-2">
+        <Label>Напоминание о записи</Label>
+        <Select v-model="formData.reminder">
+          <SelectTrigger>
+            <SelectValue placeholder="Выберите время" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0">Не напоминать</SelectItem>
+            <SelectItem value="1">За 1 час до визита</SelectItem>
+            <SelectItem value="2">За 2 часа до визита</SelectItem>
+            <SelectItem value="3">За 3 часа до визита</SelectItem>
+            <SelectItem value="24">За 24 часа до визита</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div class="grid gap-2">
@@ -100,16 +116,18 @@
         <Checkbox 
           id="agreement" 
           :checked="formData.agreement"
-          @update:checked="(val) => formData.agreement = val"
+          @update:checked="(val: boolean) => formData.agreement = val"
         />
         <div class="grid gap-1.5 leading-none">
           <label
             for="agreement"
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
           >
-            Я согласен с
-            <a href="/privacy" class="text-primary hover:underline underline-offset-4">политикой конфиденциальности</a>
-            и даю согласие на обработку персональных данных
+            Я предоставляю согласие на обработку персональных данных, а также подтверждаю ознакомление и согласие с 
+            <a href="https://alteg.io/en/info/privacy" target="_blank" class="text-primary hover:underline underline-offset-4">Политикой конфиденциальности</a>
+             и 
+            <a href="https://alteg.io/en/info/terms" target="_blank" class="text-primary hover:underline underline-offset-4">Пользовательским соглашением</a>
+            <span class="text-destructive">*</span>
           </label>
           <p v-if="errors.agreement" class="text-sm text-destructive">{{ errors.agreement }}</p>
         </div>
@@ -134,7 +152,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Подтвердить
+          Записаться
         </Button>
       </div>
     </form>
@@ -151,6 +169,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const emit = defineEmits<{
   back: []
@@ -160,19 +185,55 @@ const emit = defineEmits<{
 const {
   selectedService,
   selectedStaff,
+  selectedTime,
+  staff,
   formattedDateTime,
   totalPrice,
   estimatedDuration,
   setClientInfo,
   createBooking,
+  setNotifyBySms,
 } = useBookingFlow()
+
+const displayStaff = computed(() => {
+  // Если мастер уже выбран, используем его
+  if (selectedStaff.value) {
+    return {
+      name: selectedStaff.value.name,
+      avatar_url: selectedStaff.value.avatar_url || selectedStaff.value.avatar_big || selectedStaff.value.avatar
+    }
+  }
+
+  // Если режима "Все специалисты", ищем мастера по ID из слота
+  if (selectedTime.value?.staff_id) {
+    const foundStaff = staff.value.find(s => s.id == selectedTime.value?.staff_id)
+    
+    if (foundStaff) {
+      return {
+        name: foundStaff.name,
+        avatar_url: foundStaff.avatar_url || foundStaff.avatar_big || foundStaff.avatar
+      }
+    }
+    
+    // Fallback если мастера нет в списке
+    if (selectedTime.value.staff_name) {
+       return {
+         name: selectedTime.value.staff_name,
+         avatar_url: null
+       }
+    }
+  }
+  
+  return null
+})
 
 const formData = reactive({
   name: '',
-  phone: '',
+  phone: '+998',
   email: '',
   comment: '',
-  agreement: false,
+  reminder: '1', // Default to 1 hour
+  agreement: true, // Default to true for better UX
 })
 
 const errors = reactive({
@@ -187,7 +248,7 @@ const isSubmitting = ref(false)
 const isFormValid = computed(() => {
   return (
     formData.name.trim().length >= 2 &&
-    formData.phone.replace(/\D/g, '').length >= 10 &&
+    validatePhoneValue(formData.phone) &&
     formData.agreement &&
     !errors.name &&
     !errors.phone &&
@@ -203,10 +264,16 @@ const validateName = () => {
   }
 }
 
+const validatePhoneValue = (phone: string) => {
+  const cleaned = phone.replace(/\D/g, '')
+  // Validating for Uzbekistan: 998 + 9 digits = 12 digits total
+  // Or just check minimum length reasonably
+  return cleaned.length >= 9
+}
+
 const validatePhone = () => {
-  const cleaned = formData.phone.replace(/\D/g, '')
-  if (cleaned.length < 10) {
-    errors.phone = 'Введите корректный номер телефона'
+  if (!validatePhoneValue(formData.phone)) {
+    errors.phone = 'Введите корректный номер телефона (мин. 9 цифр)'
   } else {
     errors.phone = ''
   }
@@ -247,6 +314,9 @@ const handleSubmit = async () => {
       comment: formData.comment || undefined,
     })
 
+    // Устанавливаем напоминание
+    setNotifyBySms(parseInt(formData.reminder))
+
     const success = await createBooking()
 
     if (success) {
@@ -260,12 +330,10 @@ const handleSubmit = async () => {
 }
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
+  return new Intl.NumberFormat('uz-UZ', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price)
+  }).format(price) + ' сум'
 }
 
 const formatDuration = (seconds: number) => {
