@@ -229,7 +229,34 @@ export const useBookingStore = defineStore('booking', () => {
         client: clientInfo.value,
       })
 
-      bookingResult.value = result
+      // Сформировать ответ для отображения (приводим к типу AltegBookingResponse)
+      const recordData = (result.data && result.data.data && result.data.data[0]) ? result.data.data[0] : {}
+
+      // Определяем мастера (если был выбран "Любой", берем из слота)
+      const staffDefault = {
+        id: selectedTime.value.staff_id || 0,
+        name: selectedTime.value.staff_name || 'Мастер',
+        avatar_url: undefined,
+        avatar: undefined,
+        avatar_big: undefined
+      }
+      const staffData: AltegStaff = selectedStaff.value ? selectedStaff.value : staffDefault
+
+      // Type assertion or manual mapping to satisfy AltegBookingResponse
+      const finalResult: AltegBookingResponse = {
+        id: recordData.record_id || Date.now(),
+        status: 'confirmed',
+        service: selectedService.value,
+        staff: staffData,
+        datetime: selectedTime.value.datetime,
+        client: {
+          name: clientInfo.value.name,
+          phone: clientInfo.value.phone
+        },
+        code: recordData.record_id ? String(recordData.record_id) : undefined
+      }
+
+      bookingResult.value = finalResult
       return true
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Ошибка создания записи'

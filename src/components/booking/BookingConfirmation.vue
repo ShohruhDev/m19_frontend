@@ -66,6 +66,7 @@
           placeholder="+998 (__) ___-__-__"
           :class="{'border-destructive': errors.phone}"
           required
+          @input="handlePhoneInput"
           @blur="validatePhone"
         />
         <p v-if="errors.phone" class="text-sm text-destructive">{{ errors.phone }}</p>
@@ -264,16 +265,70 @@ const validateName = () => {
   }
 }
 
+const handlePhoneInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  let value = input.value.replace(/\D/g, '')
+  
+  // Prevent deleting the prefix
+  if (!value) {
+    formData.phone = '+998'
+    return
+  }
+
+  // Determine country code based on input or default to 998
+  let isUzbek = true
+  if (value.startsWith('7')) {
+    isUzbek = false
+  } else if (value.startsWith('998')) {
+    isUzbek = true
+  } else if (value.length > 0 && '998'.startsWith(value)) {
+    // Handling partial delete of 998
+    // allow typing
+  }
+
+  // Format
+  let formatted = ''
+  if (isUzbek) {
+    // Ensure prefix
+    if (!value.startsWith('998')) value = '998' + value
+    
+    // Limit length (998 + 9 digits = 12)
+    value = value.substring(0, 12)
+    
+    // Mask: +998 (XX) XXX-XX-XX
+    if (value.length > 0) formatted = '+' + value.substring(0, 3)
+    if (value.length > 3) formatted += ' (' + value.substring(3, 5)
+    if (value.length > 5) formatted += ') ' + value.substring(5, 8)
+    if (value.length > 8) formatted += '-' + value.substring(8, 10)
+    if (value.length > 10) formatted += '-' + value.substring(10, 12)
+  } else {
+    // Russian mask: +7 (XXX) XXX-XX-XX
+    // Ensure prefix
+    if (!value.startsWith('7')) value = '7' + value
+    
+    // Limit length (7 + 10 digits = 11)
+    value = value.substring(0, 11)
+    
+    if (value.length > 0) formatted = '+' + value.substring(0, 1)
+    if (value.length > 1) formatted += ' (' + value.substring(1, 4)
+    if (value.length > 4) formatted += ') ' + value.substring(4, 7)
+    if (value.length > 7) formatted += '-' + value.substring(7, 9)
+    if (value.length > 9) formatted += '-' + value.substring(9, 11)
+  }
+  
+  formData.phone = formatted
+}
+
 const validatePhoneValue = (phone: string) => {
   const cleaned = phone.replace(/\D/g, '')
   // Validating for Uzbekistan: 998 + 9 digits = 12 digits total
-  // Or just check minimum length reasonably
-  return cleaned.length >= 9
+  // Russian: 7 + 10 digits = 11 digits
+  return cleaned.length >= 11
 }
 
 const validatePhone = () => {
   if (!validatePhoneValue(formData.phone)) {
-    errors.phone = 'Введите корректный номер телефона (мин. 9 цифр)'
+    errors.phone = 'Введите корректный номер телефона'
   } else {
     errors.phone = ''
   }

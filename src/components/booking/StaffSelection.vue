@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { computed } from 'vue'
 import { useBookingFlow } from '@/composables'
 import SelectableCard from '@/components/ui/SelectableCard.vue'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -137,9 +137,10 @@ const formatSlotLabel = (slot: any) => {
   return `${dateLabel} ${slot.time}`
 }
 
-onMounted(() => {
-  if (staff.value.length === 0) {
-    loadStaff()
-  }
-})
+// loadStaff is called automatically by store when service is selected
+// onMounted(() => {
+//   if (staff.value.length === 0) {
+//     loadStaff()
+//   }
+// })
 </script>

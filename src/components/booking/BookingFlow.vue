@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { useBookingFlow } from '@/composables'
 import {
   Dialog,
@@ -210,11 +210,12 @@ watch(
   { immediate: true }
 )
 
-onMounted(() => {
-  if (props.isOpen) {
-    loadServices()
-  }
-})
+// loadServices is handled by the watcher above
+// onMounted(() => {
+//   if (props.isOpen) {
+//     loadServices()
+//   }
+// })
 
 // Cleanup: restore body scroll on unmount
 onUnmounted(() => {

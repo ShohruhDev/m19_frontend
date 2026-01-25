@@ -239,9 +239,11 @@ class AltegIntegrationService {
    * Валидация телефона
    */
   private isValidPhone(phone: string): boolean {
-    // Простая валидация для российских номеров
+    // Валидация для российских (+7) и узбекских (+998) номеров
     const cleaned = phone.replace(/\D/g, '')
-    return cleaned.length >= 10 && cleaned.length <= 11
+    // Russian: 10-11 digits (e.g., 9001234567 or 79001234567)
+    // Uzbekistan: 12 digits with country code (998901234567) or 9 digits without
+    return cleaned.length >= 9 && cleaned.length <= 12
   }
 
   /**
