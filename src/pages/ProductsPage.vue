@@ -4,13 +4,12 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import ProductFilters from '@/components/shop/ProductFilters.vue'
 import CartDrawer from '@/components/shop/CartDrawer.vue' 
 
-import { useProductsStore, useCartStore, useFavoritesStore } from '@/stores'
+import { useProductsStore, useCartStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 
 // Stores
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
-const favoritesStore = useFavoritesStore()
 
 const { loading, products, categories } = storeToRefs(productsStore)
 
@@ -36,10 +35,6 @@ const filteredProducts = computed(() => {
 // Handlers
 const handleAddToCart = (product: any) => {
   cartStore.addItem(product)
-}
-
-const toggleFavorite = (product: any) => {
-  favoritesStore.toggle(product.id)
 }
 
 const handleFiltersUpdate = (filters: any) => {
@@ -105,13 +100,7 @@ const handleFiltersUpdate = (filters: any) => {
 
                     <!-- Overlay Buttons -->
                     <div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center gap-2 bg-gradient-to-t from-dark/90 to-transparent pt-12">
-                       <button 
-                         @click.stop="toggleFavorite(product)"
-                         class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center text-white transition-colors"
-                         :class="{ 'text-red-500': favoritesStore.isFavorite(product.id) }"
-                       >
-                         ♥
-                       </button>
+                       <!-- Buttons removed -->
                     </div>
                   </div>
 
@@ -129,7 +118,7 @@ const handleFiltersUpdate = (filters: any) => {
                       <div class="text-xl font-bold text-white">{{ product.price }} ₽</div>
                       <button
                         @click="handleAddToCart(product)"
-                        class="px-4 py-2 bg-m19-gold text-dark font-medium rounded hover:bg-white transition-colors text-sm"
+                        class="px-4 py-2 bg-white hover:bg-white/90 text-dark font-medium rounded transition-colors text-sm"
                       >
                         В корзину
                       </button>

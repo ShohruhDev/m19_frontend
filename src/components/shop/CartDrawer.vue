@@ -23,26 +23,46 @@
             </button>
           </div>
 
-          <!-- Empty State -->
-          <div v-if="cartStore.items.length === 0" class="flex-1 flex flex-col items-center justify-center text-center px-6">
-            <div class="w-20 h-20 bg-gold-500/10 rounded-full flex items-center justify-center mb-4 backdrop-blur">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gold-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+            <!-- Success State -->
+            <div v-if="success" class="flex-1 flex flex-col items-center justify-center text-center px-6 animate-slide-in">
+              <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-4 ring-2 ring-green-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 class="text-2xl font-heading text-white mb-2">Заказ принят!</h3>
+              <p class="text-white/60 mb-6">Номер заказа: <span class="text-gold-500 font-bold">#{{ orderId }}</span></p>
+              <p class="text-sm text-white/40 mb-8 max-w-xs">
+                Мы свяжемся с вами в ближайшее время для подтверждения.
+              </p>
+              <button 
+                @click="closeSuccess"
+                class="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all border border-white/10 hover:border-white/20"
+              >
+                Отлично
+              </button>
             </div>
-            <p class="text-lg text-white/60 mb-2">Ваша корзина пуста</p>
-            <p class="text-sm text-white/40 mb-6">Добавьте товары для оформления заказа</p>
-            <button 
-              @click="appStore.closeCart()"
-              class="px-6 py-3 bg-gold-500 hover:bg-gold-600 text-dark font-heading font-medium rounded-lg transition-all duration-300"
-            >
-              Перейти к покупкам
-            </button>
-          </div>
 
-          <!-- Items List -->
-          <div v-else class="flex-1 overflow-y-auto px-6 py-4">
-            <TransitionGroup name="cart-item" tag="div" class="space-y-4">
+            <!-- Empty State -->
+            <div v-else-if="cartStore.items.length === 0" class="flex-1 flex flex-col items-center justify-center text-center px-6">
+              <div class="w-20 h-20 bg-gold-500/10 rounded-full flex items-center justify-center mb-4 backdrop-blur">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gold-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <p class="text-lg text-white/60 mb-2">Ваша корзина пуста</p>
+              <p class="text-sm text-white/40 mb-6">Добавьте товары для оформления заказа</p>
+              <button 
+                @click="appStore.closeCart()"
+                class="px-6 py-3 bg-gold-500 hover:bg-gold-600 text-dark font-heading font-medium rounded-lg transition-all duration-300"
+              >
+                Перейти к покупкам
+              </button>
+            </div>
+
+            <!-- Items List -->
+            <div v-else-if="!success" class="flex-1 overflow-y-auto px-6 py-4">
+              <TransitionGroup name="cart-item" tag="div" class="space-y-4">
               <div 
                 v-for="item in cartStore.items" 
                 :key="item.id"
@@ -107,100 +127,145 @@
             </TransitionGroup>
           </div>
 
-          <!-- Footer / Checkout -->
-          <div v-if="cartStore.items.length > 0" class="p-6 border-t border-white/10 bg-dark-900/95 backdrop-blur">
-            <!-- Subtotal -->
-            <div class="space-y-2 mb-4">
-              <div class="flex justify-between text-white/60">
-                <span>Товаров:</span>
-                <span>{{ cartStore.items.length }}</span>
+            <!-- Guest Checkout Form -->
+            <div v-if="cartStore.items.length > 0 && !success" class="px-6 py-4 bg-white/5 border-t border-white/10 space-y-3">
+              <h3 class="text-white font-heading text-sm uppercase tracking-wide opacity-70">Контактные данные</h3>
+              <div>
+                <input 
+                  v-model="clientName"
+                  type="text" 
+                  placeholder="Ваше имя"
+                  class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:border-gold-500 focus:outline-none transition-colors"
+                />
               </div>
-              <div class="flex justify-between items-baseline pt-3 border-t border-white/5">
-                <span class="text-lg text-white/80 font-heading">Итого:</span>
-                <span class="text-3xl font-heading text-gold-500">{{ formatPrice(cartStore.totalPrice) }}</span>
+              <div>
+                <input 
+                  v-model="clientPhone"
+                  type="tel" 
+                  placeholder="+998 90 123 45 67"
+                  class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:border-gold-500 focus:outline-none transition-colors"
+                />
               </div>
             </div>
 
-            <!-- Checkout Button -->
-            <button 
-              @click="handleCheckout"
-              :disabled="loading"
-              class="w-full py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-dark rounded-xl font-heading font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <span v-if="loading" class="animate-spin">⌛</span>
-              {{ loading ? 'Оформляется...' : 'Оформить заказ' }}
-            </button>
+            <!-- Footer / Checkout -->
+            <div v-if="cartStore.items.length > 0 && !success" class="p-6 border-t border-white/10 bg-dark-900/95 backdrop-blur">
+              <!-- Subtotal -->
+              <div class="space-y-2 mb-4">
+                <div class="flex justify-between text-white/60">
+                  <span>Товаров:</span>
+                  <span>{{ cartStore.items.length }}</span>
+                </div>
+                <div class="flex justify-between items-baseline pt-3 border-t border-white/5">
+                  <span class="text-lg text-white/80 font-heading">Итого:</span>
+                  <span class="text-3xl font-heading text-gold-500">{{ formatPrice(cartStore.totalPrice) }}</span>
+                </div>
+              </div>
 
-            <!-- Continue Shopping -->
-            <button 
-              @click="appStore.closeCart()"
-              class="w-full mt-3 py-2 text-white/60 hover:text-gold-500 font-medium text-sm transition-colors"
-            >
-              Продолжить покупки
-            </button>
+              <!-- Checkout Button -->
+              <button 
+                @click="handleCheckout"
+                :disabled="loading || !isValidOrder"
+                class="w-full py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-dark rounded-xl font-heading font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span v-if="loading" class="animate-spin">⌛</span>
+                {{ loading ? 'Оформляется...' : 'Оформить заказ' }}
+              </button>
+
+              <!-- Continue Shopping -->
+              <button 
+                @click="appStore.closeCart()"
+                class="w-full mt-3 py-2 text-white/60 hover:text-gold-500 font-medium text-sm transition-colors"
+              >
+                Продолжить покупки
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
-  </Teleport>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useAppStore, useCartStore, useAuthStore } from '@/stores'
-import { altegService } from '@/services/alteg.service'
-import { useRouter } from 'vue-router'
-
-const appStore = useAppStore()
-const cartStore = useCartStore()
-const authStore = useAuthStore()
-const router = useRouter()
-const loading = ref(false)
-
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'UZS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(price).replace('UZS', 'сўм')
-}
-
-const handleCheckout = async () => {
-  if (!authStore.isAuthenticated) {
-    appStore.closeCart()
-    router.push('/login')
-    return
+      </Transition>
+    </Teleport>
+  </template>
+  
+  <script setup lang="ts">
+  import { ref, computed } from 'vue'
+  import { useAppStore, useCartStore } from '@/stores'
+  import { useRouter } from 'vue-router'
+  
+  const appStore = useAppStore()
+  const cartStore = useCartStore()
+  const router = useRouter()
+  const loading = ref(false)
+  const success = ref(false)
+  const orderId = ref<string | number>('')
+  
+  const clientName = ref('')
+  const clientPhone = ref('+998 ')
+  
+  const isValidOrder = computed(() => {
+    return clientName.value.trim().length > 2 && clientPhone.value.length >= 9
+  })
+  
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency: 'UZS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price).replace('UZS', 'сўм')
   }
-
-  loading.value = true
-  try {
-    const orderData = {
-      client: authStore.user,
-      items: cartStore.items,
-      total: cartStore.totalPrice,
-      staff_id: 0 // Technical staff
+  
+  const handleCheckout = async () => {
+    if (!isValidOrder.value) return
+  
+    loading.value = true
+    try {
+      const orderData = {
+        client_info: {
+          name: clientName.value,
+          phone: clientPhone.value
+        },
+        items: cartStore.items,
+        total: cartStore.totalPrice
+      }
+  
+      // Send to Backend API
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://m19-backend.vercel.app/api'
+      const response = await fetch(`${baseUrl}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      })
+      
+      const res = await response.json()
+      
+      if (!res.success) {
+        throw new Error(res.message || 'Ошибка оформления')
+      }
+      
+      // Success state
+      orderId.value = res.data.id
+      success.value = true
+      cartStore.clearCart()
+      
+    } catch (e: any) {
+      console.error(e)
+      alert('Ошибка при оформлении заказа: ' + e.message)
+    } finally {
+      loading.value = false
     }
-
-    const res = await altegService.createOrder(orderData)
-    
-    // Clear cart
-    cartStore.clearCart()
-    appStore.closeCart()
-    
-    // Show success (Toast or Alert)
-    alert(`Заказ успешно оформлен! Номер заказа: ${res.id || 'N/A'}`)
-  } catch (e) {
-    console.error(e)
-    alert('Ошибка при оформлении заказа')
-  } finally {
-    loading.value = false
   }
-}
-</script>
+
+  const closeSuccess = () => {
+    success.value = false
+    appStore.closeCart()
+    // Reset form
+    clientName.value = ''
+    clientPhone.value = '+998 '
+  }
+  </script>
 
 <style scoped>
 .slide-fade-enter-active {

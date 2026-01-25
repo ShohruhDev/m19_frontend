@@ -5,9 +5,7 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { altegService } from '@/services/alteg.service'
 import { formatErrorMessage } from '@/utils/errorHandler'
-import { mockProducts, mockCategories } from '@/data/mockProducts'
 
 // Interface based on Altegio Goods (Mixed: Category or Item)
 export interface CatalogItem {
@@ -44,25 +42,39 @@ export const useProductsStore = defineStore('products', () => {
       // Simulate API delay for realism
       await new Promise(resolve => setTimeout(resolve, 500))
 
-      // Use mock data
-      const allItems: CatalogItem[] = mockProducts.map(product => ({
-        id: product.id,
-        title: product.title,
+      // Fetch from Backend API
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://m19-backend.vercel.app/api'
+      const response = await fetch(`${baseUrl}/products`)
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch products')
+      }
+
+      const productsFromApi = result.data || []
+
+      // Map DB products to CatalogItem
+      const allItems: CatalogItem[] = productsFromApi.map((p: any) => ({
+        id: p.id,
+        title: p.title,
         is_category: false,
         is_item: true,
-        price: product.price,
-        image_url: product.image_url,
-        description: product.description,
+        price: p.price,
+        image_url: p.image_url,
+        description: p.description,
         parent_id: 0,
-        category_id: product.category_id,
-        amount: product.amount,
-        category_name: mockCategories.find(c => c.id === product.category_id)?.title || 'Прочее'
+        category_id: 0, // Simplified for now
+        amount: 999,
+        category_name: p.category || 'General'
       }))
 
-      const catNames = mockCategories.map(c => c.title)
+      // Generate categories from data if needed, or use predefined
+      const uniqueCategories = [...new Set(allItems.map(i => i.category_name))]
+        .filter((c): c is string => !!c)
+
 
       items.value = allItems
-      categories.value = catNames
+      categories.value = uniqueCategories
     } catch (err: any) {
       error.value = formatErrorMessage(err)
       console.error(err)
