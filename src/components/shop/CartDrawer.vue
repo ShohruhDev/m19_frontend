@@ -192,11 +192,9 @@
   <script setup lang="ts">
   import { ref, computed } from 'vue'
   import { useAppStore, useCartStore } from '@/stores'
-  import { useRouter } from 'vue-router'
   
   const appStore = useAppStore()
   const cartStore = useCartStore()
-  const router = useRouter()
   const loading = ref(false)
   const success = ref(false)
   const orderId = ref<string | number>('')

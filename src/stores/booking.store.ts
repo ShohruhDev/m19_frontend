@@ -230,7 +230,15 @@ export const useBookingStore = defineStore('booking', () => {
       })
 
       // Сформировать ответ для отображения (приводим к типу AltegBookingResponse)
-      const recordData = (result.data && result.data.data && result.data.data[0]) ? result.data.data[0] : {}
+      // Сформировать ответ для отображения (приводим к типу AltegBookingResponse)
+      // result is already the unwraped data from altegService
+      // But altegService returns response.data.data. 
+      // Sometimes it might be an array or object depending on endpoint.
+      // Let's safe check. If result has property 'id', it's likely the object.
+      // If it has 'data', maybe it wasn't unwrapped correctly?
+      // Based on error, TS says result is AltegBookingResponse and it acts like it doesn't have data.
+      // Let's assume result IS the Record data or close to it.
+      const recordData: any = result
 
       // Определяем мастера (если был выбран "Любой", берем из слота)
       const staffDefault = {

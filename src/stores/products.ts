@@ -83,21 +83,7 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
-  function mapToItem(g: any, categoryName: string): CatalogItem {
-    return {
-      id: g.id || g.category_id,
-      title: g.title,
-      is_category: false,
-      is_item: true,
-      price: g.price_min || g.price || 0,
-      image_url: g.image || g.image_url || '',
-      description: g.description || '',
-      parent_id: g.parent_id || 0,
-      category_id: g.category_id,
-      amount: g.amount,
-      category_name: categoryName
-    }
-  }
+
 
   function $reset() {
     items.value = []
