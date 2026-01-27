@@ -33,10 +33,10 @@
              <ul class="space-y-3 text-white/60">
                <li class="flex items-start gap-3">
                  <span class="text-m19-gold mt-1">📍</span>
-                 <div>
+                 <a href="https://yandex.uz/maps/10335/tashkent/?text=M19%20Barbershop%20ул.%20Авлиё-Ота%2C%2036" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
                    <div>ул. Авлиё-Ота, 36</div>
                    <div class="text-xs opacity-70">Ташкент, метро «Айбек»</div>
-                 </div>
+                 </a>
                </li>
                <li class="flex items-center gap-3">
                  <span class="text-m19-gold">✉️</span>

@@ -95,7 +95,7 @@
       </div>
     </main>
 
-    <BookingFlow :is-open="isBookingOpen" @close="isBookingOpen = false" />
+    <BookingFlowModal :is-open="isBookingOpen" @close="isBookingOpen = false" />
   </div>
 </template>
 
@@ -103,7 +103,7 @@
 import { ref, onMounted } from 'vue'
 import { useBookingFlow } from '@/composables'
 import AppHeader from '@/components/common/AppHeader.vue'
-import BookingFlow from '@/components/booking/BookingFlow.vue'
+import BookingFlowModal from '@/components/booking/BookingFlow.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { altegService } from '@/services'
 import type { AltegStaff } from '@/types'

@@ -27,7 +27,7 @@
           >
             <a
               :href="href"
-              @click="navigate"
+              @click="handleNavClick($event, item.path, navigate)"
               class="font-heading font-medium uppercase tracking-wider transition-colors duration-300 relative group"
               :class="[
                 isActive || (item.path === '/' && isExactActive) 
@@ -36,14 +36,6 @@
               ]"
             >
               {{ item.name }}
-              <span
-                class="absolute -bottom-1 left-0 h-0.5 bg-gold-500 transition-all duration-300"
-                :class="[
-                   isActive || (item.path === '/' && isExactActive)
-                     ? 'w-full' 
-                     : 'w-0 group-hover:w-full'
-                ]"
-              ></span>
             </a>
           </RouterLink>
         </nav>
@@ -55,7 +47,7 @@
           <!-- Cart Button -->
           <button 
             @click="appStore.openCart()"
-            class="hidden md:flex relative p-2 text-white/80 hover:text-gold-500 transition-colors mr-2"
+            class="cursor-pointer hidden md:flex relative p-2 text-white/80 hover:text-gold-500 transition-colors mr-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -123,7 +115,7 @@
                    ? 'text-gold-500 border-gold-500 bg-white/5' 
                    : 'text-white/70 hover:text-gold-500 border-transparent hover:border-gold-500/50'
               ]"
-              @click="(e) => { navigate(e); closeMobileMenu(); }"
+              @click="(e) => { handleNavClick(e, item.path, navigate); closeMobileMenu(); }"
             >
               {{ item.name }}
             </a>
@@ -161,11 +153,30 @@ const isScrolled = ref(false)
 
 const navItems = [
   { name: 'Главная', path: '/' },
-  { name: 'Услуги', path: '/services' },
-  { name: 'Мастера', path: '/staff' },
+  { name: 'Услуги', path: '/#services' },
+  { name: 'Мастера', path: '/#masters' },
   { name: 'Косметика', path: '/products' },
-
 ]
+
+const handleNavClick = (e: Event, path: string, navigate: (e: any) => void) => {
+  // If it's a hash link
+  if (path.includes('#')) {
+    const [pathname, hash] = path.split('#')
+    // If we are already on the home page (or the page the hash belongs to)
+    if (window.location.pathname === pathname || (pathname === '/' && window.location.pathname === '/')) {
+      e.preventDefault()
+      const element = document.getElementById(hash)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+        // Update URL without reload
+        history.pushState(null, '', path)
+      }
+      return
+    }
+  }
+  // Otherwise default navigation
+  navigate(e)
+}
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50

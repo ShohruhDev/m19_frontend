@@ -13,7 +13,7 @@
              transition-all duration-500 pointer-events-none"
     ></div>
 
-    <div class="relative z-10 p-8">
+    <div class="relative z-10 h-full w-full">
       <slot></slot>
     </div>
 

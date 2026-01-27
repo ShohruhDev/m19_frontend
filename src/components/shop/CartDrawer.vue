@@ -15,7 +15,7 @@
             <h2 class="text-2xl font-heading text-white">Корзина</h2>
             <button 
               @click="appStore.closeCart()"
-              class="p-2 hover:bg-white/5 rounded-lg transition-colors"
+              class="cursor-pointer p-2 hover:bg-white/5 rounded-lg transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white/70 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -37,7 +37,7 @@
               </p>
               <button 
                 @click="closeSuccess"
-                class="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all border border-white/10 hover:border-white/20"
+                class="cursor-pointer px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all border border-white/10 hover:border-white/20"
               >
                 Отлично
               </button>
@@ -53,8 +53,8 @@
               <p class="text-lg text-white/60 mb-2">Ваша корзина пуста</p>
               <p class="text-sm text-white/40 mb-6">Добавьте товары для оформления заказа</p>
               <button 
-                @click="appStore.closeCart()"
-                class="px-6 py-3 bg-gold-500 hover:bg-gold-600 text-dark font-heading font-medium rounded-lg transition-all duration-300"
+                @click="goShopping"
+                class="cursor-pointer px-6 py-3 bg-gold-500 hover:bg-gold-600 text-dark font-heading font-medium rounded-lg transition-all duration-300"
               >
                 Перейти к покупкам
               </button>
@@ -97,14 +97,14 @@
                       <div class="flex items-center gap-2 bg-dark-800/50 border border-white/10 rounded-lg p-1">
                         <button 
                           @click="cartStore.updateQuantity(item.id, item.quantity - 1)"
-                          class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-md text-white/70 hover:text-gold-500 transition-all font-medium"
+                          class="cursor-pointer w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-md text-white/70 hover:text-gold-500 transition-all font-medium"
                         >
                           −
                         </button>
                         <span class="w-8 text-center font-heading text-white">{{ item.quantity }}</span>
                         <button 
                           @click="cartStore.updateQuantity(item.id, item.quantity + 1)"
-                          class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-md text-white/70 hover:text-gold-500 transition-all font-medium"
+                          class="cursor-pointer w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-md text-white/70 hover:text-gold-500 transition-all font-medium"
                         >
                           +
                         </button>
@@ -113,7 +113,7 @@
                       <!-- Remove Button -->
                       <button 
                         @click="cartStore.removeItem(item.id)"
-                        class="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors font-medium uppercase tracking-wide"
+                        class="cursor-pointer flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors font-medium uppercase tracking-wide"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -166,7 +166,7 @@
               <button 
                 @click="handleCheckout"
                 :disabled="loading || !isValidOrder"
-                class="w-full py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-dark rounded-xl font-heading font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 transform hover:scale-[1.02] active:scale-[0.98]"
+                class="cursor-pointer w-full py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-dark rounded-xl font-heading font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-gold-500/20 hover:shadow-gold-500/40 transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -177,8 +177,8 @@
 
               <!-- Continue Shopping -->
               <button 
-                @click="appStore.closeCart()"
-                class="w-full mt-3 py-2 text-white/60 hover:text-gold-500 font-medium text-sm transition-colors"
+                @click="goShopping"
+                class="cursor-pointer w-full mt-3 py-2 text-white/60 hover:text-gold-500 font-medium text-sm transition-colors"
               >
                 Продолжить покупки
               </button>
@@ -192,12 +192,19 @@
   <script setup lang="ts">
   import { ref, computed } from 'vue'
   import { useAppStore, useCartStore } from '@/stores'
+  import { useRouter } from 'vue-router'
   
   const appStore = useAppStore()
   const cartStore = useCartStore()
+  const router = useRouter()
   const loading = ref(false)
   const success = ref(false)
   const orderId = ref<string | number>('')
+
+  const goShopping = () => {
+    appStore.closeCart()
+    router.push('/products')
+  }
   
   const clientName = ref('')
   const clientPhone = ref('+998 ')

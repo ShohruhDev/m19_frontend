@@ -1,10 +1,10 @@
 <template>
   <Dialog :open="isOpen" @update:open="(val) => !val && handleClose()">
-    <DialogContent class="sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background border-border">
+    <DialogContent class="w-full h-[100dvh] sm:h-auto sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background border-border flex flex-col">
       <!-- Header with Progress -->
-      <DialogHeader class="p-6 border-b border-border bg-card">
+      <DialogHeader class="p-4 sm:p-6 border-b border-border bg-card shrink-0">
         <div class="flex items-center justify-between mb-4">
-          <DialogTitle class="text-2xl font-heading font-bold">Онлайн-запись</DialogTitle>
+          <DialogTitle class="text-xl sm:text-2xl font-heading font-bold">Онлайн-запись</DialogTitle>
           <div class="text-sm font-medium text-muted-foreground pr-8">
             Шаг <span class="text-primary">{{ stepIndex + 1 }}</span> из {{ totalSteps }}
           </div>
@@ -25,7 +25,7 @@
 
       <!-- Main Content Area -->
       <div 
-        class="p-6 min-h-[400px] max-h-[60vh] overflow-y-auto scrollbar-custom bg-background relative"
+        class="flex-1 p-4 sm:p-6 overflow-y-auto scrollbar-custom bg-background relative"
         @wheel.stop
       >
         <Transition :name="transitionName" mode="out-in">

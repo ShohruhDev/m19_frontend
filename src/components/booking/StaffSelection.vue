@@ -12,7 +12,7 @@
       <Button variant="outline" class="mt-4" @click="loadStaff">Попробовать снова</Button>
     </div>
 
-    <ScrollArea v-else class="h-[400px] pr-4">
+    <div v-else class="pb-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- Staff List (Filtered) -->
         <SelectableCard
@@ -20,9 +20,9 @@
           :key="member.id"
           :is-selected="selectedStaff?.id === member.id"
           @click="selectStaff(member)"
-          class="p-4 flex flex-col items-center text-center h-full min-h-[160px]"
+          class="p-3 sm:p-4 flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-0 h-auto sm:h-full sm:min-h-[160px] transition-all"
         >
-          <div class="w-16 h-16 rounded-full overflow-hidden bg-secondary mb-3 border-2 border-border shadow-sm">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-secondary sm:mb-3 border-2 border-border shadow-sm shrink-0">
             <img 
               v-if="member.avatar" 
               :src="member.avatar" 
@@ -34,13 +34,25 @@
             </div>
           </div>
           
-          <h3 class="font-heading font-medium text-foreground">{{ member.name }}</h3>
-          <p class="text-xs text-muted-foreground mt-1 mb-2">
-            {{ member.specialization || 'Барбер' }}
-          </p>
-          <div class="flex items-center gap-1 mb-3 text-xs text-yellow-500">
-             <span>★</span>
-             <span>{{ member.rating || '5.0' }}</span>
+          <div class="flex-1 min-w-0 flex flex-col sm:items-center">
+            <div class="flex items-center justify-between sm:justify-center w-full">
+              <h3 class="font-heading font-medium text-foreground truncate">{{ member.name }}</h3>
+              <!-- Rating on mobile right side -->
+              <div class="flex sm:hidden items-center gap-1 text-xs text-yellow-500">
+                 <span>★</span>
+                 <span>{{ member.rating || '5.0' }}</span>
+              </div>
+            </div>
+            
+            <p class="text-xs text-muted-foreground sm:mt-1 sm:mb-2 truncate">
+              {{ member.specialization || 'Барбер' }}
+            </p>
+            
+            <!-- Rating on desktop center -->
+            <div class="hidden sm:flex items-center gap-1 mb-3 text-xs text-yellow-500">
+               <span>★</span>
+               <span>{{ member.rating || '5.0' }}</span>
+            </div>
           </div>
 
           <!-- Quick Availablity Chips -->
@@ -57,12 +69,10 @@
               </button>
             </div>
           </div>
-          <div v-else class="text-[10px] text-muted-foreground">
-             Нет свободных окон на ближайшее время
-          </div>
+
         </SelectableCard>
       </div>
-    </ScrollArea>
+    </div>
   </div>
 </template>
 
@@ -72,7 +82,7 @@ import { useBookingFlow } from '@/composables'
 import SelectableCard from '@/components/ui/SelectableCard.vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
+
 import type { AltegStaff } from '@/types'
 
 const {

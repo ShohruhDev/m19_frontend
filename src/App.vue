@@ -10,9 +10,11 @@
     <SplashScreen :is-visible="isLoading" />
 
     <!-- Booking Modal (Global) -->
-    <BookingFlow :is-open="appStore.isBookingModalOpen" @close="appStore.closeBookingModal()" />
+    <BookingFlowModal :is-open="appStore.isBookingModalOpen" @close="appStore.closeBookingModal()" />
+    <CartDrawer />
     
     <AppFooter />
+    <Toaster position="top-right" richColors closeButton />
   </div>
 </template>
 
@@ -23,8 +25,10 @@ import { useSmoothScroll } from '@/composables'
 import { useAppStore } from '@/stores'
 
 import SplashScreen from '@/components/ui/SplashScreen.vue'
-import BookingFlow from '@/components/booking/BookingFlow.vue'
+import BookingFlowModal from '@/components/booking/BookingFlow.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import CartDrawer from '@/components/shop/CartDrawer.vue'
+import { Toaster } from 'vue-sonner'
 
 // Инициализация smooth scroll
 useSmoothScroll()

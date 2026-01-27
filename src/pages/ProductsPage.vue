@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import ProductFilters from '@/components/shop/ProductFilters.vue'
-import CartDrawer from '@/components/shop/CartDrawer.vue' 
+import { useToast } from '@/composables/useToast'
 
 import { useProductsStore, useCartStore } from '@/stores'
 import { storeToRefs } from 'pinia'
@@ -10,6 +10,7 @@ import { storeToRefs } from 'pinia'
 // Stores
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
+const { success } = useToast()
 
 const { loading, products, categories } = storeToRefs(productsStore)
 
@@ -32,9 +33,15 @@ const filteredProducts = computed(() => {
   return result
 })
 
+// Helpers
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('uz-UZ').format(price) + ' сум'
+}
+
 // Handlers
 const handleAddToCart = (product: any) => {
   cartStore.addItem(product)
+  success('Товар добавлен в корзину')
 }
 
 const handleFiltersUpdate = (filters: any) => {
@@ -47,7 +54,6 @@ const handleFiltersUpdate = (filters: any) => {
     <AppHeader />
     
     <main class="pt-32 pb-20">
-      <CartDrawer />
 
       <div class="container-custom">
         <div class="text-center mb-16">
@@ -115,10 +121,10 @@ const handleFiltersUpdate = (filters: any) => {
                     </div>
 
                     <div class="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                      <div class="text-xl font-bold text-white">{{ product.price }} ₽</div>
+                      <div class="text-xl font-bold text-white">{{ formatPrice(product.price) }}</div>
                       <button
                         @click="handleAddToCart(product)"
-                        class="px-4 py-2 bg-white hover:bg-white/90 text-dark font-medium rounded transition-colors text-sm"
+                        class="cursor-pointer px-4 py-2 bg-white hover:bg-white/90 text-dark font-medium rounded transition-colors text-sm"
                       >
                         В корзину
                       </button>

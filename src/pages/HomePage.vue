@@ -5,24 +5,7 @@
     <main>
       <HeroSection />
 
-      <!-- Features Section -->
-      <section class="section-padding bg-dark-50">
-        <div class="container-custom">
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              v-for="(feature, index) in FEATURES"
-              :key="index"
-              class="card-premium p-6 text-center group hover:scale-105 transition-transform duration-300"
-            >
-              <div class="text-5xl mb-4">{{ feature.icon }}</div>
-              <h3 class="text-xl font-heading font-bold text-white mb-2">
-                {{ feature.title }}
-              </h3>
-              <p class="text-white/70 text-sm">{{ feature.description }}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       <!-- Services Preview Section -->
       <section id="services" class="section-padding bg-dark">
@@ -36,71 +19,86 @@
             </p>
           </div>
 
-          <div v-if="bookingStore.isLoading && !bookingStore.services.length" class="text-center py-12">
-             <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-             <p class="text-white/50">Загрузка услуг...</p>
+          <div v-if="isLoading" class="flex justify-center py-12">
+             <div class="w-12 h-12 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
 
-          <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              v-for="service in featuredServices"
-              :key="service.id"
-              class="card-premium p-8 group flex flex-col"
+          <div v-else class="space-y-6">
+            <Collapsible
+              v-for="(category, index) in categories"
+              :key="category.id"
+              v-model:open="isOpenState[index]"
+              class="group/collapsible"
             >
-              <div class="text-4xl mb-4 text-primary">
-                 <!-- Generic Icon -->
-                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
-                 </svg>
-              </div>
-              <h3 class="text-2xl font-heading font-bold text-white mb-3">
-                {{ service.title }}
-              </h3>
-              <p v-if="service.description" class="text-white/70 mb-6 line-clamp-2 flex-grow">
-                {{ service.description }}
-              </p>
-              <div class="flex items-end justify-between mt-auto">
-                <span class="text-2xl font-bold text-primary">{{ formatPrice(service.price_min) }}</span>
-                <span class="text-white/50 text-sm">{{ formatDuration(getServiceDuration(service)) }}</span>
-              </div>
-            </div>
-          </div>
+              <CollapsibleTrigger class="w-full flex items-center justify-between p-6 bg-dark-50 border border-white/10 rounded-lg hover:border-gold-500/50 hover:bg-white/5 transition-all duration-300 cursor-pointer text-left">
+                <h2 class="text-2xl font-heading font-bold text-white group-hover/collapsible:text-gold-500 transition-colors">
+                  {{ category.title }}
+                </h2>
+                <ChevronDown 
+                  class="w-6 h-6 text-gold-500 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" 
+                />
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent>
+                <div class="pt-4 grid gap-4">
+                  <div
+                    v-for="service in category.services"
+                    :key="service.id"
+                    class="card-premium p-4 md:p-6 flex flex-col md:flex-row gap-6 group hover:translate-x-1 transition-transform"
+                  >
+                    <!-- Service Image -->
+                    <div class="w-full md:w-32 h-32 md:h-24 shrink-0 rounded-lg overflow-hidden bg-dark-100 border border-white/10 relative">
+                       <img 
+                         v-if="service.image_url" 
+                         :src="service.image_url" 
+                         :alt="service.title"
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                         @error="(e: any) => e.target.style.display = 'none'"
+                       />
+                       <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-100 to-dark-200">
+                          <Scissors class="w-8 h-8 text-white/20" />
+                       </div>
+                    </div>
 
-          <div class="text-center mt-12">
-            <BaseButton variant="secondary" size="lg" @click="$router.push('/services')">
-              Все услуги и цены
-            </BaseButton>
+                    <!-- Content -->
+                    <div class="flex-1 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div class="flex-1">
+                        <h3 class="text-xl font-heading font-semibold text-white mb-2 group-hover:text-gold-500 transition-colors">
+                          {{ service.title }}
+                        </h3>
+                        <p class="text-white/70 text-sm mb-3 max-w-xl">{{ service.description }}</p>
+                        <div class="flex items-center gap-4 text-sm text-white/50">
+                          <span class="flex items-center gap-1">
+                            <Clock class="w-4 h-4" />
+                            {{ formatDuration(getServiceDuration(service)) }}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-4 mt-2 md:mt-0">
+                        <div class="text-2xl font-bold text-gold-500 whitespace-nowrap">{{ formatPrice(service.price_min) }}</div>
+                        <BaseButton
+                          variant="secondary"
+                          size="sm"
+                          class="w-full md:w-auto"
+                          @click="bookService(service)"
+                        >
+                          Записаться
+                        </BaseButton>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
       </section>
 
-      <!-- CTA Section -->
-      <section class="section-padding bg-premium-dark relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-          <div class="absolute inset-0 bg-gradient-to-r from-gold-500 to-gold-700"></div>
-        </div>
 
-        <div class="container-custom relative z-10">
-          <div class="max-w-3xl mx-auto text-center space-y-8">
-            <h2 class="text-display-md font-heading font-bold text-white">
-              Готовы к переменам?
-            </h2>
-            <p class="text-xl text-white/70">
-              Запишитесь онлайн и получите скидку 10% на первое посещение
-            </p>
-            <BaseButton
-              variant="primary"
-              size="lg"
-              @click="appStore.openBookingModal()"
-            >
-              Записаться сейчас
-            </BaseButton>
-          </div>
-        </div>
-      </section>
 
       <!-- Staff Preview -->
-      <section class="section-padding bg-dark">
+      <section id="masters" class="section-padding bg-dark">
         <div class="container-custom">
           <div class="text-center mb-16">
             <h2 class="text-display-md font-heading font-bold text-white mb-4">
@@ -111,111 +109,224 @@
             </p>
           </div>
 
-          <div v-if="bookingStore.isLoading && !bookingStore.staff.length" class="text-center py-12">
-             <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div v-if="isLoading" class="flex justify-center py-12">
+             <div class="w-12 h-12 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
              <p class="text-white/50">Загрузка мастеров...</p>
           </div>
 
-          <div v-else class="grid md:grid-cols-3 gap-8">
+          <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div
-              v-for="master in featuredMasters"
-              :key="master.id"
+              v-for="(master, index) in staffMembers"
+              :key="index"
               class="card-premium p-0 overflow-hidden group"
             >
+              <!-- Avatar -->
               <div class="aspect-square bg-dark-50 relative overflow-hidden">
-                <img 
-                  v-if="master.avatar_url || master.avatar || master.avatar_big"
-                  :src="master.avatar_url || master.avatar_big || master.avatar"
-                  :alt="master.name"
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div v-else class="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground bg-secondary">
-                  {{ master.name.charAt(0) }}
-                </div>
-                <!-- Overlay -->
                 <div
                   class="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent
-                         opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
                 ></div>
+                
+                <!-- Real Image -->
+                <img 
+                  v-if="master.avatar" 
+                  :src="master.avatar" 
+                  :alt="master.name"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                
+                <!-- Fallback Initials -->
+                <div v-else class="absolute inset-0 flex items-center justify-center text-6xl font-bold text-gold-500/20">
+                  {{ master.name.charAt(0) }}
+                </div>
               </div>
-              <div class="p-6">
-                <h3 class="text-xl font-heading font-bold text-white mb-2">
-                  {{ master.name }}
-                </h3>
-                <p class="text-primary mb-4 text-sm">{{ master.specialization || 'Барбер' }}</p>
-                <div class="flex items-center gap-2 text-sm text-white/50 mb-4">
-                  <span class="flex items-center gap-1 text-yellow-500" v-if="master.rating">
-                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+
+              <!-- Info -->
+              <div class="p-6 space-y-4">
+                <div>
+                  <h3 class="text-2xl font-heading font-bold text-white mb-1">
+                    {{ master.name }}
+                  </h3>
+                  <p class="text-gold-500 font-medium">{{ master.role }}</p>
+                </div>
+
+                <p class="text-white/70 text-sm line-clamp-2">{{ master.description }}</p>
+
+                <!-- Stats -->
+                <div class="flex items-center gap-4 text-sm text-white/50 pt-4 border-t border-white/10">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-gold-500" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                     {{ master.rating }}
                   </span>
-                  <span v-if="master.experience_years">{{ master.experience_years }} лет опыта</span>
+                  <span>{{ master.reviews }} отзывов</span>
                 </div>
-                
-                <BaseButton 
-                  variant="outline" 
-                  size="sm" 
-                  class="w-full"
-                  @click="bookMaster(master)"
+
+                <BaseButton
+                  variant="outline"
+                  class="w-full hover:bg-gold-500 hover:text-black border-gold-500/50 text-gold-500 cursor-pointer"
+                  @click="bookWithMaster(master)"
                 >
                   Записаться
                 </BaseButton>
               </div>
             </div>
           </div>
-
-          <div class="text-center mt-12">
-            <BaseButton variant="secondary" size="lg" @click="$router.push('/staff')">
-              Все мастера
-            </BaseButton>
-          </div>
         </div>
       </section>
 
+      <!-- Reviews Section -->
+      <ReviewsSection />
+
       <!-- Contact Section -->
       <ContactSection />
-
-
     </main>
+
+    <BookingFlowModal :is-open="isBookingOpen" @close="isBookingOpen = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
-
+import { onMounted, ref } from 'vue'
 import { useBookingFlow } from '@/composables'
-import { useAppStore, useBookingStore } from '@/stores'
+import { useAppStore } from '@/stores'
 import AppHeader from '@/components/common/AppHeader.vue'
 import HeroSection from '@/components/sections/HeroSection.vue'
+import ReviewsSection from '@/components/sections/ReviewsSection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import { FEATURES } from '@/data/m19-data'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown, Clock, Scissors } from 'lucide-vue-next'
+
 import { altegService } from '@/services'
-import type { AltegStaff, AltegService } from '@/types'
+import type { AltegStaff, AltegService, AltegServiceCategory } from '@/types'
 
 const appStore = useAppStore()
-const bookingStore = useBookingStore()
 const { initializeBooking } = useBookingFlow()
 
-const localStaff = ref<AltegStaff[]>([])
-const isMastersLoading = ref(false)
+const isBookingOpen = ref(false)
+const isLoading = ref(true)
+const categories = ref<AltegServiceCategory[]>([])
+const isOpenState = ref<boolean[]>([])
+const staffMembers = ref<any[]>([])
 
-const bookMaster = (master: AltegStaff) => {
+// Helper to strip HTML tags
+const stripHtml = (html: string) => {
+  if (!html) return ''
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
+
+const bookService = (service: AltegService) => {
+  initializeBooking({ service })
+  appStore.openBookingModal()
+}
+
+const bookWithMaster = (master: any) => {
   initializeBooking({ staff: master })
   appStore.openBookingModal()
 }
 
-// Computed for Services
-const featuredServices = computed(() => {
-  // Sort by popularity if available, or just take first 6
-  return bookingStore.services.slice(0, 6)
-})
+const fetchCategories = async () => {
+  try {
+    const allServices = await altegService.fetchServices()
+    
+    // Group services by category_id
+    const groupedServices: Record<number, AltegService[]> = {}
+    allServices.forEach(service => {
+      const catId = service.category_id || 0
+      if (!groupedServices[catId]) {
+        groupedServices[catId] = []
+      }
+      groupedServices[catId].push(service)
+    })
 
-// Computed for Masters
-const featuredMasters = computed(() => {
-  return localStaff.value.slice(0, 3)
-})
+    // Map groups to categories with titles based on heuristics
+    const mappedCategories: AltegServiceCategory[] = []
+    
+    const getCategoryTitle = (services: AltegService[]): string => {
+      const hitSales = services.find(s => s.title.includes('ХИТ ПРОДАЖ'))
+      if (hitSales) {
+        if (hitSales.price_min > 480000) return 'Индивидуальное обслуживание в VIP Room'
+        if (hitSales.price_min > 400000) return 'Профессиональный барбер в общем зале'
+      }
+      const haircut = services.find(s => s.title.includes('Классическая стрижка'))
+      if (haircut) {
+         if (haircut.price_min > 200000) return 'Индивидуальное обслуживание в VIP Room'
+         return 'Профессиональный барбер в общем зале'
+      }
+      return 'Услуги'
+    }
+
+    Object.entries(groupedServices).forEach(([idStr, services]) => {
+      const id = parseInt(idStr)
+      if (services.length > 0) {
+        const title = getCategoryTitle(services)
+        
+        // Check if category with this title already exists
+        const existingCategory = mappedCategories.find(c => c.title === title)
+        
+        if (existingCategory) {
+          // Merge services into existing category
+          existingCategory.services.push(...services.map(s => ({
+            ...s,
+            image_url: s.image_group?.images?.basic?.path || s.image_url || undefined
+          })))
+        } else {
+          mappedCategories.push({
+            id,
+            title,
+            services: services.map(s => ({
+              ...s,
+              image_url: s.image_group?.images?.basic?.path || s.image_url || undefined
+            }))
+          })
+        }
+      }
+    })
+
+    mappedCategories.sort((a, b) => {
+      if (a.title.includes('VIP')) return 1
+      if (b.title.includes('VIP')) return -1
+      return 0
+    })
+
+    categories.value = mappedCategories
+    // Close all categories by default
+    isOpenState.value = mappedCategories.map(() => false)
+    
+  } catch (err) {
+    console.error('Failed to load services:', err)
+  }
+}
+
+const fetchStaff = async () => {
+  try {
+    const staff = await altegService.fetchStaff()
+    
+    // Filter and Transform API data
+    staffMembers.value = staff
+      .filter((master: AltegStaff) => {
+        const role = (master.specialization || 'Барбер').toLowerCase()
+        // Show only Barbers (exclude Reception, Admin, Accountant, etc.)
+        return role.includes('barber') || role.includes('барбер')
+      })
+      .map((master: AltegStaff) => ({
+        ...master,
+        name: master.name,
+        role: master.specialization || 'Барбер', 
+        description: stripHtml(master.information || master.description || 'Профессионал своего дела'),
+        rating: master.rating || 5.0,
+        reviews: master.reviews_count || 0,
+        experience: master.experience_years || 0,
+        specializations: master.services ? ['Универсал'] : (master.specialization ? [master.specialization] : ['Мужские стрижки']),
+        avatar: master.avatar_big || master.avatar_url || master.avatar
+      }))
+  } catch (err) {
+    console.error('Failed to load staff:', err)
+  }
+}
 
 // Formatting Helpers
 const getServiceDuration = (service: AltegService): number => {
@@ -242,37 +353,12 @@ const formatDuration = (seconds: number) => {
 }
 
 onMounted(async () => {
-  // Load Services
-  if (bookingStore.services.length === 0) {
-    await bookingStore.loadServices()
-  }
-
-  // Load Masters for Landing Page
-  // Try to fetch staff without service ID (if supported) or use the first service
-  if (localStaff.value.length === 0) {
-    isMastersLoading.value = true
-    try {
-      // Try fetching all staff using '0' or similar if API supports it, or just pass a service ID
-      // If store services loaded, use first one
-      let serviceId: string | number = 0
-      if (bookingStore.services.length > 0) {
-        serviceId = bookingStore.services[0].id
-      }
-      
-      const rawStaff = await altegService.fetchStaff(serviceId)
-      
-      // Filter only Barbers and clean data if needed
-      localStaff.value = rawStaff.filter(master => {
-         const role = (master.specialization || 'Барбер').toLowerCase()
-         return role.includes('barber') || role.includes('барбер')
-      })
-
-    } catch (error) {
-      console.error('Failed to load landing page masters:', error)
-    } finally {
-      isMastersLoading.value = false
-    }
-  }
+  isLoading.value = true
+  await Promise.all([
+    fetchCategories(),
+    fetchStaff()
+  ])
+  isLoading.value = false
 })
 </script>
 

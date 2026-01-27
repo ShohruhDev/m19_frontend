@@ -17,8 +17,7 @@
 
     <div 
       v-else 
-      class="max-h-[500px] overflow-y-auto pr-4 scrollbar-custom"
-      @wheel.stop
+      class="pb-4"
     >
       <div class="space-y-3">
         <Collapsible

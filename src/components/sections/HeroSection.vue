@@ -50,9 +50,7 @@
           >
             Записаться онлайн
           </BaseButton>
-          <BaseButton variant="ghost" size="lg" @click="scrollToServices">
-            Наши услуги
-          </BaseButton>
+
         </div>
 
         <!-- Stats -->
@@ -194,11 +192,6 @@ const openBooking = () => {
   appStore.openBookingModal()
 }
 
-const scrollToServices = () => {
-  const servicesSection = document.getElementById('services')
-  if (servicesSection) {
-    servicesSection.scrollIntoView({ behavior: 'smooth' })
-  }
-}
+
 </script>
 

@@ -12,6 +12,13 @@ export interface AltegService {
   duration: number // в минутах (обычно 0, не используется)
   category_id?: number
   image_url?: string
+  image_group?: {
+    images?: {
+      basic?: {
+        path?: string
+      }
+    }
+  }
   popularity?: number
   staff?: Array<{
     id: number

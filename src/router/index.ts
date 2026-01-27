@@ -12,22 +12,6 @@ const router = createRouter({
       },
     },
     {
-      path: '/services',
-      name: 'services',
-      component: () => import('@/pages/ServicesPage.vue'),
-      meta: {
-        title: 'Услуги и цены - M19 Barbershop',
-      },
-    },
-    {
-      path: '/staff',
-      name: 'staff',
-      component: () => import('@/pages/StaffPage.vue'),
-      meta: {
-        title: 'Наши мастера - M19 Barbershop',
-      },
-    },
-    {
       path: '/products',
       name: 'products',
       component: () => import('@/pages/ProductsPage.vue'),
