@@ -33,7 +33,6 @@ export const useBookingStore = defineStore('booking', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const bookingResult = ref<AltegBookingResponse | null>(null)
-  const showAllStaff = ref(false) // Переключатель "Все специалисты"
   const notifyBySms = ref<number>(0)
 
   // Computed
@@ -42,7 +41,7 @@ export const useBookingStore = defineStore('booking', () => {
       case 'service':
         return selectedService.value !== null
       case 'staff':
-        return selectedStaff.value !== null || showAllStaff.value // Can go next if staff selected or 'show all staff' is active
+        return selectedStaff.value !== null
       case 'time':
         return selectedTime.value !== null
       case 'confirmation':
@@ -108,16 +107,7 @@ export const useBookingStore = defineStore('booking', () => {
   }
 
   async function loadAvailableSlots() {
-    if (!selectedService.value || !selectedDate.value) return
-
-    // Если showAllStaff включен или мастер не выбран, загружаем слоты всех мастеров
-    if (showAllStaff.value || !selectedStaff.value) {
-      return loadAvailableSlotsAllStaff()
-    }
-
-    // Иначе загружаем слоты выбранного мастера
-    // This check is now redundant due to the above condition: if we reach here, selectedStaff.value must be true.
-    // if (!selectedStaff.value) return
+    if (!selectedService.value || !selectedDate.value || !selectedStaff.value) return
 
     isLoading.value = true
     error.value = null
@@ -154,49 +144,7 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
-  async function loadAvailableSlotsAllStaff() {
-    if (!selectedService.value || !selectedDate.value) return
 
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const slots = await altegService.fetchAvailableTimeAllStaff(
-        selectedService.value.id,
-        selectedDate.value
-      )
-
-      // Filter out past time slots if the selected date is today
-      const today = new Date().toISOString().split('T')[0]
-      const isToday = selectedDate.value === today
-
-      if (isToday) {
-        const now = new Date()
-        const currentHour = now.getHours()
-        const currentMinute = now.getMinutes()
-
-        availableSlots.value = slots.filter(slot => {
-          const [slotHour, slotMinute] = slot.time.split(':').map(Number)
-          return slotHour > currentHour || (slotHour === currentHour && slotMinute > currentMinute)
-        })
-      } else {
-        availableSlots.value = slots
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Ошибка загрузки времени'
-      console.error('Failed to load available slots from all staff:', err)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  function toggleShowAllStaff() {
-    showAllStaff.value = !showAllStaff.value
-    // Перезагрузить слоты при переключении
-    if (selectedDate.value) {
-      loadAvailableSlots()
-    }
-  }
 
   function setNotifyBySms(hours: number) {
     notifyBySms.value = hours
@@ -210,10 +158,7 @@ export const useBookingStore = defineStore('booking', () => {
     isLoading.value = true
     error.value = null
 
-    // Determine staff ID (selected staff or from slot if 'All Specialists' mode)
-    const staffId = showAllStaff.value && selectedTime.value.staff_id
-      ? selectedTime.value.staff_id
-      : selectedStaff.value?.id
+    const staffId = selectedStaff.value?.id
 
     if (!staffId) {
       error.value = 'Не выбран мастер'
@@ -384,7 +329,7 @@ export const useBookingStore = defineStore('booking', () => {
           }
           break
         case 'staff':
-          if (!selectedStaff.value && !showAllStaff.value) {
+          if (!selectedStaff.value) {
             currentStep.value = 'staff'
             // Загрузить мастеров для выбранной услуги
             if (selectedService.value) {
@@ -443,7 +388,6 @@ export const useBookingStore = defineStore('booking', () => {
     isLoading,
     error,
     bookingResult,
-    showAllStaff,
     notifyBySms,
 
     // Computed
@@ -470,7 +414,6 @@ export const useBookingStore = defineStore('booking', () => {
     initializeBooking,
     resetBooking,
     clearError,
-    toggleShowAllStaff,
   }
 })
 

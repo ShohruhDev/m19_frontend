@@ -25,7 +25,8 @@
           <div
             v-for="(master, index) in staffMembers"
             :key="index"
-            class="card-premium p-0 overflow-hidden group"
+            class="card-premium p-0 overflow-hidden group cursor-pointer"
+            @click="openStaffDetails(master)"
           >
             <!-- Avatar -->
             <div class="aspect-square bg-dark-50 relative overflow-hidden">
@@ -95,6 +96,11 @@
       </div>
     </main>
 
+    <StaffDetailsModal 
+      v-model:is-open="isDetailsModalOpen" 
+      :staff="selectedStaffMember"
+      @book="bookWithMaster"
+    />
     <BookingFlowModal :is-open="isBookingOpen" @close="isBookingOpen = false" />
   </div>
 </template>
@@ -104,11 +110,14 @@ import { ref, onMounted } from 'vue'
 import { useBookingFlow } from '@/composables'
 import AppHeader from '@/components/common/AppHeader.vue'
 import BookingFlowModal from '@/components/booking/BookingFlow.vue'
+import StaffDetailsModal from '@/components/staff/StaffDetailsModal.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { altegService } from '@/services'
 import type { AltegStaff } from '@/types'
 
 const isBookingOpen = ref(false)
+const isDetailsModalOpen = ref(false)
+const selectedStaffMember = ref<any>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 const staffMembers = ref<any[]>([])
@@ -140,7 +149,7 @@ const fetchStaff = async () => {
         role: master.specialization || 'Барбер', 
         description: stripHtml(master.information || master.description || 'Профессионал своего дела'),
         rating: master.rating || 5.0,
-        reviews: master.reviews_count || 0,
+        reviews: master.comments_count || 0,
         experience: master.experience_years || 0,
         specializations: master.services ? ['Универсал'] : (master.specialization ? [master.specialization] : ['Мужские стрижки']),
         avatar: master.avatar_big || master.avatar_url || master.avatar
@@ -153,10 +162,15 @@ const fetchStaff = async () => {
   }
 }
 
+const openStaffDetails = (master: any) => {
+  selectedStaffMember.value = master
+  isDetailsModalOpen.value = true
+}
+
 const bookWithMaster = (master: any) => {
-  // Находим оригинальный объект AltegStaff, так как мы его трансформировали для отображения
-  // В данном случае объект уже содержит необходимые поля, но для типизации
-  // передадим его как AltegStaff.
+  // Close details modal if open
+  isDetailsModalOpen.value = false
+  // Initialize booking with selected staff
   initializeBooking({ staff: master })
   isBookingOpen.value = true
 }

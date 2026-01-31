@@ -44,7 +44,7 @@
                 @click="selectService(service)"
                 class="p-4"
               >
-                <div class="flex justify-between items-start gap-4">
+                <div class="flex justify-between items-start gap-4" :class="{ 'pr-12': selectedService?.id === service.id }">
                   <div class="flex-1 min-w-0">
                     <h4 class="font-heading font-medium text-foreground mb-1 truncate">
                       {{ service.title }}

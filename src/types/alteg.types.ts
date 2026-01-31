@@ -41,6 +41,7 @@ export interface AltegStaff {
   avatar_big?: string
   rating?: number
   reviews_count?: number
+  comments_count?: number // Number of reviews/comments from API
   experience_years?: number
   description?: string
   information?: string

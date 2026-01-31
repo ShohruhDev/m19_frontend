@@ -25,70 +25,6 @@
 
     <!-- Main Content -->
     <div v-else class="space-y-6">
-      <!-- Quick Availability Section -->
-      <Transition name="fade">
-        <div v-if="quickSlots.length > 0" class="space-y-3">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <h3 class="text-sm font-semibold text-foreground">Ближайшее время</h3>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <Button
-              v-for="slot in quickSlots"
-              :key="slot.datetime"
-              variant="outline"
-              class="flex flex-col items-center py-3 h-auto hover:border-primary hover:bg-primary/5 transition-all duration-200"
-              :class="{ 'border-primary bg-primary/10': selectedTime?.datetime === slot.datetime }"
-              @click="selectQuickSlot(slot)"
-            >
-              <span class="text-xs text-muted-foreground mb-1">{{ slot.dateLabel }}</span>
-              <span class="text-base font-semibold text-foreground">{{ slot.time }}</span>
-            </Button>
-          </div>
-        </div>
-      </Transition>
-
-      <!-- Staff Toggle Tabs -->
-      <div v-if="selectedStaff" class="space-y-3">
-        <div class="flex items-center gap-2 p-1 bg-secondary/50 rounded-lg border border-border">
-          <button
-            @click="toggleShowAllStaff"
-            :class="[
-              'flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200',
-              !showAllStaff 
-                ? 'bg-primary text-primary-foreground shadow-sm' 
-                : 'text-muted-foreground hover:text-foreground'
-            ]"
-          >
-            {{ selectedStaff.name }}
-          </button>
-          <button
-            @click="toggleShowAllStaff"
-            :class="[
-              'flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200',
-              showAllStaff 
-                ? 'bg-primary text-primary-foreground shadow-sm' 
-                : 'text-muted-foreground hover:text-foreground'
-            ]"
-          >
-            Все специалисты
-          </button>
-        </div>
-        
-        <!-- Hint for more availability -->
-        <Transition name="fade">
-          <div v-if="!showAllStaff && availableSlots.length < 5" class="flex items-start gap-2 p-3 bg-primary/10 border border-primary/20 rounded-lg">
-            <svg class="w-4 h-4 text-primary mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-xs text-primary">
-              Больше свободного времени если выбрать всех специалистов
-            </p>
-          </div>
-        </Transition>
-      </div>
 
       <!-- Calendar Section -->
       <div class="space-y-4">
@@ -168,20 +104,14 @@
                     :key="slot.datetime"
                     :variant="selectedTime?.datetime === slot.datetime ? 'default' : 'outline'"
                     size="sm"
-                    :class="[
-                      'font-medium transition-all duration-200 hover:scale-105',
-                      showAllStaff ? 'h-auto py-2 flex-col' : 'h-11',
-                      {
-                        'shadow-md shadow-primary/20': selectedTime?.datetime === slot.datetime,
-                        'hover:border-primary hover:bg-primary/5': selectedTime?.datetime !== slot.datetime
-                      }
-                    ]"
+                    class="font-medium transition-all duration-200 hover:scale-105 h-11"
+                    :class="{
+                      'shadow-md shadow-primary/20': selectedTime?.datetime === slot.datetime,
+                      'hover:border-primary hover:bg-primary/5': selectedTime?.datetime !== slot.datetime
+                    }"
                     @click="selectTime(slot)"
                   >
                     <span>{{ slot.time }}</span>
-                    <span v-if="showAllStaff && slot.staff_name" class="text-[10px] opacity-70 mt-0.5">
-                      {{ slot.staff_name }}
-                    </span>
                   </Button>
                 </div>
               </CollapsibleContent>
@@ -243,11 +173,9 @@ const {
   selectedTime,
   isLoading,
   error,
-  showAllStaff,
   selectDate: selectDateAction,
   selectTime: selectTimeAction,
-  loadAvailableSlots,
-  toggleShowAllStaff,
+  loadAvailableSlots
 } = useBookingFlow()
 
 // Date picker state
@@ -301,12 +229,7 @@ const onDateSelect = (newDate: Date | undefined) => {
   selectDateAction(dateString)
 }
 
-const selectQuickSlot = (slot: any) => {
-  // Set the date first
-  selectDateAction(slot.date)
-  // Then select the time
-  selectTimeAction(slot)
-}
+
 
 const selectTime = (slot: AltegScheduleSlot) => {
   selectTimeAction(slot)

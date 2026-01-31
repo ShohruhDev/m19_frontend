@@ -118,7 +118,8 @@
             <div
               v-for="(master, index) in staffMembers"
               :key="index"
-              class="card-premium p-0 overflow-hidden group"
+              class="card-premium p-0 overflow-hidden group cursor-pointer"
+              @click="openStaffModal(master)"
             >
               <!-- Avatar -->
               <div class="aspect-square bg-dark-50 relative overflow-hidden">
@@ -166,7 +167,7 @@
                 <BaseButton
                   variant="outline"
                   class="w-full hover:bg-gold-500 hover:text-black border-gold-500/50 text-gold-500 cursor-pointer"
-                  @click="bookWithMaster(master)"
+                  @click.stop="bookWithMaster(master)"
                 >
                   Записаться
                 </BaseButton>
@@ -184,6 +185,12 @@
     </main>
 
     <BookingFlowModal :is-open="isBookingOpen" @close="isBookingOpen = false" />
+    <StaffDetailsModal 
+      :is-open="isStaffModalOpen" 
+      :staff="selectedStaff" 
+      @update:is-open="isStaffModalOpen = $event"
+      @book="bookWithMaster"
+    />
   </div>
 </template>
 
@@ -196,6 +203,7 @@ import HeroSection from '@/components/sections/HeroSection.vue'
 import ReviewsSection from '@/components/sections/ReviewsSection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import StaffDetailsModal from '@/components/staff/StaffDetailsModal.vue'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown, Clock, Scissors } from 'lucide-vue-next'
 
@@ -210,6 +218,8 @@ const isLoading = ref(true)
 const categories = ref<AltegServiceCategory[]>([])
 const isOpenState = ref<boolean[]>([])
 const staffMembers = ref<any[]>([])
+const isStaffModalOpen = ref(false)
+const selectedStaff = ref<any>(null)
 
 // Helper to strip HTML tags
 const stripHtml = (html: string) => {
@@ -225,7 +235,13 @@ const bookService = (service: AltegService) => {
 
 const bookWithMaster = (master: any) => {
   initializeBooking({ staff: master })
+  isStaffModalOpen.value = false
   appStore.openBookingModal()
+}
+
+const openStaffModal = (master: any) => {
+  selectedStaff.value = master
+  isStaffModalOpen.value = true
 }
 
 const fetchCategories = async () => {
@@ -318,7 +334,7 @@ const fetchStaff = async () => {
         role: master.specialization || 'Барбер', 
         description: stripHtml(master.information || master.description || 'Профессионал своего дела'),
         rating: master.rating || 5.0,
-        reviews: master.reviews_count || 0,
+        reviews: master.comments_count || 0,
         experience: master.experience_years || 0,
         specializations: master.services ? ['Универсал'] : (master.specialization ? [master.specialization] : ['Мужские стрижки']),
         avatar: master.avatar_big || master.avatar_url || master.avatar

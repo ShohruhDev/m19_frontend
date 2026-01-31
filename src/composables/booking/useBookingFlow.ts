@@ -14,15 +14,14 @@ export function useBookingFlow() {
   const {
     currentStep, selectedService, selectedStaff, selectedDate, selectedTime,
     clientInfo, services, staff, availableDates, availableSlots, isLoading,
-    error, bookingResult, canGoNext, canGoBack, stepIndex, totalSteps, progress,
-    showAllStaff
+    error, bookingResult, canGoNext, canGoBack, stepIndex, totalSteps, progress
   } = storeToRefs(bookingStore)
 
   const {
     loadServices, loadStaff, loadAvailableSlots,
     createBooking, selectService, selectStaff, selectDate, selectTime,
     setClientInfo, nextStep, prevStep, goToStep, resetBooking, clearError,
-    toggleShowAllStaff, initializeBooking, setNotifyBySms
+    initializeBooking, setNotifyBySms
   } = bookingStore
 
   const stepConfig = computed<BookingStepConfig>(() => {
@@ -145,7 +144,6 @@ export function useBookingFlow() {
     currentStep, selectedService, selectedStaff, selectedDate, selectedTime,
     clientInfo, services, staff, availableDates, availableSlots, isLoading,
     error, bookingResult, canGoNext, canGoBack, stepIndex, totalSteps, progress,
-    showAllStaff,
 
     // Local Computed
     stepConfig,
@@ -157,7 +155,7 @@ export function useBookingFlow() {
     loadServices, loadStaff, loadAvailableSlots,
     createBooking, selectService, selectStaff, selectDate, selectTime,
     setClientInfo, nextStep, prevStep, goToStep, resetBooking, clearError,
-    toggleShowAllStaff, initializeBooking, setNotifyBySms,
+    initializeBooking, setNotifyBySms,
 
     // Methods
     isStepComplete,

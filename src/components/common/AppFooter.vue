@@ -18,11 +18,11 @@
         <div>
           <h4 class="font-bold text-white mb-4 uppercase tracking-wider text-xs">Навигация</h4>
           <ul class="space-y-3">
-            <li><RouterLink to="/" class="text-white/60 hover:text-m19-gold transition-colors">Главная</RouterLink></li>
-            <li><RouterLink to="/services" class="text-white/60 hover:text-m19-gold transition-colors">Услуги</RouterLink></li>
-            <li><RouterLink to="/staff" class="text-white/60 hover:text-m19-gold transition-colors">Мастера</RouterLink></li>
-            <li><RouterLink to="/reviews" class="text-white/60 hover:text-m19-gold transition-colors">Отзывы</RouterLink></li>
-            <li><RouterLink to="/contacts" class="text-white/60 hover:text-m19-gold transition-colors">Контакты</RouterLink></li>
+            <li><a href="#hero" class="text-white/60 hover:text-m19-gold transition-colors">Главная</a></li>
+            <li><a href="#services" class="text-white/60 hover:text-m19-gold transition-colors">Услуги</a></li>
+            <li><a href="#staff" class="text-white/60 hover:text-m19-gold transition-colors">Мастера</a></li>
+            <li><a href="#reviews" class="text-white/60 hover:text-m19-gold transition-colors">Отзывы</a></li>
+            <li><a href="#contacts" class="text-white/60 hover:text-m19-gold transition-colors">Контакты</a></li>
           </ul>
         </div>
 
@@ -60,8 +60,8 @@
       <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-white/30 text-xs">
         <div>&copy; 2026 M19 Barbershop. Все права защищены.</div>
         <div class="flex items-center gap-6">
-          <a href="#" class="hover:text-white transition-colors">Instagram</a>
-          <a href="#" class="hover:text-white transition-colors">Telegram</a>
+          <a href="https://instagram.com/m19barbershop" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Instagram</a>
+          <a href="https://t.me/m19barbershop" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Telegram</a>
         </div>
       </div>
     </div>

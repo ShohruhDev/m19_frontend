@@ -1,10 +1,32 @@
 <template>
   <div class="hero-section relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Background gradient -->
-    <div class="absolute inset-0 bg-premium-dark"></div>
+    <!-- Animated Background Slideshow -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden">
+      <!-- Image slides with Ken Burns effect -->
+      <div
+        v-for="(image, index) in backgroundImages"
+        :key="index"
+        :class="[
+          'absolute inset-0 w-full h-full transition-opacity duration-2000',
+          currentSlide === index ? 'opacity-100' : 'opacity-0'
+        ]"
+      >
+        <div
+          :style="{
+            backgroundImage: `url(${image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            animation: currentSlide === index ? 'kenBurns 10s ease-in-out infinite' : 'none'
+          }"
+          class="w-full h-full"
+        ></div>
+      </div>
+      <!-- Dark overlay for text readability -->
+      <div class="absolute inset-0 bg-black/60"></div>
+    </div>
 
     <!-- Animated background elements -->
-    <div class="absolute inset-0 opacity-30">
+    <div class="absolute inset-0 opacity-20">
       <div
         ref="circle1"
         class="absolute w-96 h-96 rounded-full bg-gold-500/10 blur-3xl"
@@ -90,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import gsap from 'gsap'
 import { useAppStore } from '@/stores'
 import { useCounterAnimation } from '@/composables'
@@ -110,6 +132,23 @@ const stat1 = ref<HTMLElement | null>(null)
 const stat2 = ref<HTMLElement | null>(null)
 const stat3 = ref<HTMLElement | null>(null)
 
+// Slideshow state
+const backgroundImages = [
+  '/barbershop-1.png',
+  '/barbershop-2.png',
+  '/barbershop-3.png'
+]
+const currentSlide = ref(0)
+
+// Auto-advance slideshow
+let slideInterval: number | null = null
+
+const startSlideshow = () => {
+  slideInterval = window.setInterval(() => {
+    currentSlide.value = (currentSlide.value + 1) % backgroundImages.length
+  }, 5000) // Change slide every 5 seconds
+}
+
 // Counter animations
 useCounterAnimation(stat1, 8, { duration: 2.5, delay: 1.5 })
 useCounterAnimation(stat2, 160, { duration: 2.5, delay: 1.5 })
@@ -117,6 +156,9 @@ useCounterAnimation(stat3, 3, { duration: 2.5, delay: 1.5 })
 
 
 onMounted(() => {
+  // Start background slideshow
+  startSlideshow()
+
   // Hero entrance animation
   const tl = gsap.timeline({
     defaults: { ease: 'power3.out' },
@@ -188,10 +230,39 @@ onMounted(() => {
   }
 })
 
+onUnmounted(() => {
+  if (slideInterval) {
+    clearInterval(slideInterval)
+  }
+})
+
 const openBooking = () => {
   appStore.openBookingModal()
 }
 
 
+
 </script>
 
+<style scoped>
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.1) translate(-2%, -2%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.duration-2000 {
+  transition-duration: 2000ms;
+}
+</style>

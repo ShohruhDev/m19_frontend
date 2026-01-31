@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="isOpen" @update:open="(val) => !val && handleClose()">
-    <DialogContent class="w-full h-[100dvh] sm:h-auto sm:max-w-[700px] p-0 gap-0 overflow-hidden bg-background border-border flex flex-col">
+    <DialogContent class="w-full max-h-[90vh] sm:max-h-[85vh] sm:max-w-[700px] p-0 gap-0 bg-background border-border flex flex-col">
       <!-- Header with Progress -->
       <DialogHeader class="p-4 sm:p-6 border-b border-border bg-card shrink-0">
         <div class="flex items-center justify-between mb-4">
@@ -25,7 +25,7 @@
 
       <!-- Main Content Area -->
       <div 
-        class="flex-1 p-4 sm:p-6 overflow-y-auto scrollbar-custom bg-background relative"
+        class="flex-1 p-4 sm:p-6 overflow-y-auto scrollbar-custom bg-background relative min-h-0"
         @wheel.stop
       >
         <Transition :name="transitionName" mode="out-in">
