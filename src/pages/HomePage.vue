@@ -204,6 +204,7 @@ import ReviewsSection from '@/components/sections/ReviewsSection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import StaffDetailsModal from '@/components/staff/StaffDetailsModal.vue'
+import BookingFlowModal from '@/components/booking/BookingFlow.vue'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown, Clock, Scissors } from 'lucide-vue-next'
 

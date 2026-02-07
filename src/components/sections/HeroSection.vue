@@ -1,26 +1,16 @@
 <template>
   <div class="hero-section relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Animated Background Slideshow -->
+    <!-- Video Background -->
     <div class="absolute inset-0 w-full h-full overflow-hidden">
-      <!-- Image slides with Ken Burns effect -->
-      <div
-        v-for="(image, index) in backgroundImages"
-        :key="index"
-        :class="[
-          'absolute inset-0 w-full h-full transition-opacity duration-2000',
-          currentSlide === index ? 'opacity-100' : 'opacity-0'
-        ]"
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        class="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover"
       >
-        <div
-          :style="{
-            backgroundImage: `url(${image})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            animation: currentSlide === index ? 'kenBurns 10s ease-in-out infinite' : 'none'
-          }"
-          class="w-full h-full"
-        ></div>
-      </div>
+        <source src="/barbershop-hero-optimized.mp4" type="video/mp4" />
+      </video>
       <!-- Dark overlay for text readability -->
       <div class="absolute inset-0 bg-black/60"></div>
     </div>
@@ -47,9 +37,8 @@
           ref="titleRef"
           class="text-display-xl font-display font-bold text-white leading-none opacity-0"
         >
-          Стиль,
-          <span class="text-gradient">который говорит</span>
-          за вас
+          <span class="text-gradient">Премиум-уход:</span>
+          стрижка, борода, чистка
         </h1>
 
         <!-- Subtitle -->
@@ -74,25 +63,6 @@
           </BaseButton>
 
         </div>
-
-        <!-- Stats -->
-        <div
-          ref="statsRef"
-          class="grid grid-cols-3 gap-8 pt-16 opacity-0"
-        >
-          <div class="text-center">
-            <div ref="stat1" class="text-4xl md:text-5xl font-bold text-gold-500 mb-2">0</div>
-            <div class="text-sm md:text-base text-white/50 uppercase tracking-wider">Лет опыта</div>
-          </div>
-          <div class="text-center">
-            <div ref="stat2" class="text-4xl md:text-5xl font-bold text-gold-500 mb-2">0</div>
-            <div class="text-sm md:text-base text-white/50 uppercase tracking-wider">Отзывов</div>
-          </div>
-          <div class="text-center">
-            <div ref="stat3" class="text-4xl md:text-5xl font-bold text-gold-500 mb-2">0</div>
-            <div class="text-sm md:text-base text-white/50 uppercase tracking-wider">Мастеров</div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -112,10 +82,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import gsap from 'gsap'
 import { useAppStore } from '@/stores'
-import { useCounterAnimation } from '@/composables'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
 const appStore = useAppStore()
@@ -123,42 +92,11 @@ const appStore = useAppStore()
 const titleRef = ref<HTMLElement | null>(null)
 const subtitleRef = ref<HTMLElement | null>(null)
 const ctaRef = ref<HTMLElement | null>(null)
-const statsRef = ref<HTMLElement | null>(null)
 const scrollIndicator = ref<HTMLElement | null>(null)
 const circle1 = ref<HTMLElement | null>(null)
 const circle2 = ref<HTMLElement | null>(null)
 
-const stat1 = ref<HTMLElement | null>(null)
-const stat2 = ref<HTMLElement | null>(null)
-const stat3 = ref<HTMLElement | null>(null)
-
-// Slideshow state
-const backgroundImages = [
-  '/barbershop-1.png',
-  '/barbershop-2.png',
-  '/barbershop-3.png'
-]
-const currentSlide = ref(0)
-
-// Auto-advance slideshow
-let slideInterval: number | null = null
-
-const startSlideshow = () => {
-  slideInterval = window.setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % backgroundImages.length
-  }, 5000) // Change slide every 5 seconds
-}
-
-// Counter animations
-useCounterAnimation(stat1, 8, { duration: 2.5, delay: 1.5 })
-useCounterAnimation(stat2, 160, { duration: 2.5, delay: 1.5 })
-useCounterAnimation(stat3, 3, { duration: 2.5, delay: 1.5 })
-
-
 onMounted(() => {
-  // Start background slideshow
-  startSlideshow()
-
   // Hero entrance animation
   const tl = gsap.timeline({
     defaults: { ease: 'power3.out' },
@@ -181,15 +119,6 @@ onMounted(() => {
     )
     .to(
       ctaRef.value,
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-      },
-      '-=0.4'
-    )
-    .to(
-      statsRef.value,
       {
         opacity: 1,
         y: 0,
@@ -227,12 +156,6 @@ onMounted(() => {
       yoyo: true,
       ease: 'power1.inOut',
     })
-  }
-})
-
-onUnmounted(() => {
-  if (slideInterval) {
-    clearInterval(slideInterval)
   }
 })
 

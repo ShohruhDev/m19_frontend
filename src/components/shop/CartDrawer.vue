@@ -141,6 +141,7 @@
               <div>
                 <input 
                   v-model="clientPhone"
+                  v-maska="'+998 ## ### ## ##'"
                   type="tel" 
                   placeholder="+998 90 123 45 67"
                   class="w-full bg-dark-800 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:border-gold-500 focus:outline-none transition-colors"
@@ -193,6 +194,7 @@
   import { ref, computed } from 'vue'
   import { useAppStore, useCartStore } from '@/stores'
   import { useRouter } from 'vue-router'
+  import { vMaska } from 'maska/vue'
   
   const appStore = useAppStore()
   const cartStore = useCartStore()
@@ -210,7 +212,8 @@
   const clientPhone = ref('+998 ')
   
   const isValidOrder = computed(() => {
-    return clientName.value.trim().length > 2 && clientPhone.value.length >= 9
+    // Check for full mask length (+998 AA BBB CC DD -> 17 chars)
+    return clientName.value.trim().length > 2 && clientPhone.value.length === 19
   })
   
   const formatPrice = (price: number) => {
