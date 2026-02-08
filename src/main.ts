@@ -11,10 +11,10 @@ import { createUnhead } from '@unhead/vue'
 const app = createApp(App)
 const head = createUnhead()
 
+app.use(head as any)
 app.use(createPinia())
 app.use(router)
 app.use(MotionPlugin)
-app.use(head as any)
 
 app.mount('#app')
 
