@@ -22,4 +22,19 @@
 <script setup lang="ts">
 import AppHeader from '@/components/common/AppHeader.vue'
 import BookingFlowModal from '@/components/booking/BookingFlow.vue'
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Онлайн-запись - M19 Barbershop',
+  meta: [
+    {
+      name: 'description',
+      content: 'Записаться на стрижку в M19 Barbershop онлайн. Выберите мастера, услугу и удобное время за пару кликов.'
+    },
+    { property: 'og:title', content: 'Онлайн-запись - M19 Barbershop' },
+    { property: 'og:description', content: 'Быстрая онлайн-запись на стрижку в Ташкенте.' },
+    { property: 'og:image', content: 'https://m19barbershop.uz/barbershop-3.png' },
+    { property: 'og:url', content: 'https://m19barbershop.uz/booking' }
+  ]
+})
 </script>

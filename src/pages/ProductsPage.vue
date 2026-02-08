@@ -12,6 +12,22 @@ const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const { success } = useToast()
 
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Магазин косметики - M19 Barbershop',
+  meta: [
+    {
+      name: 'description',
+      content: 'Купить премиальную мужскую косметику в Ташкенте. Шампуни, средства для укладки, масло для бороды от лучших мировых брендов.'
+    },
+    { property: 'og:title', content: 'Магазин косметики - M19 Barbershop' },
+    { property: 'og:description', content: 'Премиальная мужская косметика в Ташкенте.' },
+    { property: 'og:image', content: 'https://m19barbershop.uz/barbershop-2.png' },
+    { property: 'og:url', content: 'https://m19barbershop.uz/products' }
+  ]
+})
+
 const { loading, products, categories } = storeToRefs(productsStore)
 
 // State

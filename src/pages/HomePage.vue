@@ -369,6 +369,63 @@ const formatDuration = (seconds: number) => {
   return `${minutes} мин`
 }
 
+
+import { useHead } from '@unhead/vue'
+
+// SEO
+useHead({
+  title: 'M19 Barbershop - Премиальный барбершоп в Ташкенте',
+  meta: [
+    {
+      name: 'description',
+      content: 'Стильные мужские стрижки, оформление бороды и уход за лицом. Лучшие мастера, премиальная косметика и атмосфера настоящего мужского клуба.'
+    },
+    {
+      name: 'keywords',
+      content: 'барбершоп ташкент, мужская стрижка, стрижка бороды, барбер, мужской салон, m19'
+    },
+    { property: 'og:title', content: 'M19 Barbershop - Премиальный стиль' },
+    { property: 'og:description', content: 'Стильные стрижки и уход за бородой в центре Ташкента.' },
+    { property: 'og:image', content: 'https://m19barbershop.uz/barbershop-1.png' },
+    { property: 'og:url', content: 'https://m19barbershop.uz' },
+    { property: 'og:type', content: 'website' }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'HairSalon',
+        name: 'M19 Barbershop',
+        image: 'https://m19barbershop.uz/barbershop-1.png',
+        '@id': 'https://m19barbershop.uz',
+        url: 'https://m19barbershop.uz',
+        telephone: '+998991234567', // Замените на реальный
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Улица, дом', // Замените на реальный
+          addressLocality: 'Ташкент',
+          addressCountry: 'UZ'
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: 41.2995, // Примерные координаты
+          longitude: 69.2401
+        },
+        openingHoursSpecification: [
+          {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            opens: '10:00',
+            closes: '22:00'
+          }
+        ],
+        priceRange: '$$'
+      })
+    }
+  ]
+})
+
 onMounted(async () => {
   isLoading.value = true
   await Promise.all([

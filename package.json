@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
+    "@unhead/vue": "^2.1.3",
     "@vueuse/core": "^14.1.0",
     "@vueuse/motion": "^3.0.3",
     "axios": "^1.13.2",
