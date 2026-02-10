@@ -37,7 +37,7 @@
                 >
                   {{ BARBERSHOP_INFO.contact.phoneDisplay }}
                 </a>
-                <p class="text-white/50 text-sm mt-2">Звоните или пишите в WhatsApp</p>
+                <p class="text-white/50 text-sm mt-2">Звоните или пишите в Telegram</p>
               </div>
             </div>
           </div>
