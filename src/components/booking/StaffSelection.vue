@@ -98,15 +98,29 @@ const {
 } = useBookingFlow()
 
 const filteredStaff = computed(() => {
-  return staff.value.filter(member => {
+  // Фильтруем реальных барберов
+  const barbers = staff.value.filter(member => {
     const role = (member.specialization || 'Барбер').toLowerCase()
     return role.includes('barber') || role.includes('барбер')
   })
+  
+  // Добавляем опцию "Любой мастер" в начало
+  const anyMaster: AltegStaff = {
+    id: 0,
+    name: 'Любой мастер',
+    specialization: 'Выбрать свободное время',
+    avatar: '', // TODO: Add placeholder image or use initials
+    rating: 5.0
+  }
+  
+  return [anyMaster, ...barbers]
 })
 
 const selectStaff = (member: AltegStaff | null) => {
   if (member) {
     selectStaffAction(member)
+    // Auto-advance to next step
+    nextStep()
   } else {
     // Select first available or handle "Any" logic in store
     // For now, auto-select first one to proceed

@@ -6,7 +6,7 @@
         <div class="md:col-span-1">
           <div class="text-2xl font-bold font-heading text-white mb-4">M19<span class="text-m19-gold">.</span></div>
           <p class="text-white/50 max-w-xs leading-relaxed mb-6">
-            Премиум барбершоп в центре Ташкента
+            Современный барбершоп в центре Ташкента
           </p>
           <div class="text-white/50 space-y-2">
              <div class="font-bold text-white">Режим работы</div>
@@ -60,8 +60,12 @@
       <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-white/30 text-xs">
         <div>&copy; 2026 M19 Barbershop. Все права защищены.</div>
         <div class="flex items-center gap-6">
-          <a href="https://instagram.com/m19barbershop" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Instagram</a>
-          <a href="https://t.me/m19barbershop" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Telegram</a>
+          <a href="https://instagram.com/m19barbershop" target="_blank" rel="noopener noreferrer" class="hover:text-m19-gold text-white/60 transition-colors" aria-label="Instagram">
+            <Instagram class="w-5 h-5" />
+          </a>
+          <a href="https://t.me/m19barbershop" target="_blank" rel="noopener noreferrer" class="hover:text-m19-gold text-white/60 transition-colors" aria-label="Telegram">
+            <Send class="w-5 h-5" />
+          </a>
         </div>
       </div>
     </div>
@@ -69,5 +73,5 @@
 </template>
 
 <script setup lang="ts">
-// Logic if needed
+import { Instagram, Send } from 'lucide-vue-next'
 </script>

@@ -64,6 +64,7 @@ export interface AltegAvailableDate {
 
 export interface AltegBookingPayload {
   service_id: number | string
+  service_ids?: (number | string)[]
   staff_id: number | string
   datetime: string // ISO 8601
   notify_by_sms?: number // hours

@@ -6,14 +6,19 @@
     <Card class="bg-secondary/30 border-border">
       <CardContent class="p-6 space-y-6">
         <!-- Услуга -->
-        <div class="flex items-start justify-between pb-6 border-b border-white/10">
-          <div>
-            <p class="text-sm text-muted-foreground mb-1">Услуга</p>
-            <p class="text-lg font-heading font-medium text-foreground">{{ selectedService?.title }}</p>
+        <!-- Услуги -->
+        <div class="space-y-4 pb-6 border-b border-white/10">
+          <p class="text-sm text-muted-foreground">Услуги</p>
+          <div v-for="service in selectedServices" :key="service.id" class="flex justify-between items-start">
+            <p class="text-lg font-heading font-medium text-foreground">{{ service.title }}</p>
+            <p class="text-lg font-bold text-primary">{{ formatPrice(service.price_min) }}</p>
           </div>
-          <div class="text-right">
-            <p class="text-2xl font-bold text-primary">{{ formatPrice(totalPrice) }}</p>
-            <p class="text-sm text-muted-foreground">{{ formatDuration(estimatedDuration) }}</p>
+          <div class="flex justify-between items-center pt-2 border-t border-white/5">
+            <p class="text-sm text-muted-foreground">Итого</p>
+            <div class="text-right">
+              <p class="text-xl font-bold text-primary">{{ formatPrice(totalPrice) }}</p>
+              <p class="text-sm text-muted-foreground">{{ formatDuration(estimatedDuration) }}</p>
+            </div>
           </div>
         </div>
 
@@ -184,7 +189,7 @@ const emit = defineEmits<{
 }>()
 
 const {
-  selectedService,
+  selectedServices,
   selectedStaff,
   selectedTime,
   staff,
@@ -197,15 +202,16 @@ const {
 } = useBookingFlow()
 
 const displayStaff = computed(() => {
-  // Если мастер уже выбран, используем его
-  if (selectedStaff.value) {
+  // Если выбран конкретный мастер (не "Любой"), используем его
+  if (selectedStaff.value && selectedStaff.value.id !== 0) {
     return {
       name: selectedStaff.value.name,
       avatar_url: selectedStaff.value.avatar_url || selectedStaff.value.avatar_big || selectedStaff.value.avatar
     }
   }
 
-  // Если режима "Все специалисты", ищем мастера по ID из слота
+  // Если выбран "Любой мастер" (id === 0) или мастер не выбран,
+  // пытаемся определить мастера по слоту времени
   if (selectedTime.value?.staff_id) {
     const foundStaff = staff.value.find(s => s.id == selectedTime.value?.staff_id)
     
@@ -225,7 +231,10 @@ const displayStaff = computed(() => {
     }
   }
   
-  return null
+  return {
+    name: 'Мастер назначен',
+    avatar_url: null
+  }
 })
 
 const formData = reactive({

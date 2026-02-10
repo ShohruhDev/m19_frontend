@@ -19,7 +19,7 @@ import type {
 export const useBookingStore = defineStore('booking', () => {
   // State
   const currentStep = ref<BookingStep>('service')
-  const selectedService = ref<AltegService | null>(null)
+  const selectedServices = ref<AltegService[]>([])
   const selectedStaff = ref<AltegStaff | null>(null)
   const selectedDate = ref<string | null>(null)
   const selectedTime = ref<AltegScheduleSlot | null>(null)
@@ -39,7 +39,7 @@ export const useBookingStore = defineStore('booking', () => {
   const canGoNext = computed(() => {
     switch (currentStep.value) {
       case 'service':
-        return selectedService.value !== null
+        return selectedServices.value.length > 0
       case 'staff':
         return selectedStaff.value !== null
       case 'time':
@@ -52,7 +52,7 @@ export const useBookingStore = defineStore('booking', () => {
   })
 
   const canGoBack = computed(() => {
-    return currentStep.value !== 'service'
+    return currentStep.value !== 'service' && currentStep.value !== 'confirmation'
   })
 
   const stepIndex = computed(() => {
@@ -82,13 +82,16 @@ export const useBookingStore = defineStore('booking', () => {
   }
 
   async function loadStaff() {
-    if (!selectedService.value) return
+    if (selectedServices.value.length === 0) return
 
     isLoading.value = true
     error.value = null
 
     try {
-      const staffList = await altegService.fetchStaff(selectedService.value.id, true)
+      // Use the first selected service to filter staff
+      // Ideal implementation would find intersection of staff who can do ALL services
+      const primaryService = selectedServices.value[0]
+      const staffList = await altegService.fetchStaff(primaryService.id, true)
       staff.value = staffList
 
       // Проверяем, может ли текущий выбранный мастер выполнять эту услугу
@@ -107,17 +110,29 @@ export const useBookingStore = defineStore('booking', () => {
   }
 
   async function loadAvailableSlots() {
-    if (!selectedService.value || !selectedDate.value || !selectedStaff.value) return
+    if (selectedServices.value.length === 0 || !selectedDate.value || !selectedStaff.value) return
+    const primaryService = selectedServices.value[0]
 
     isLoading.value = true
     error.value = null
 
     try {
-      const slots = await altegService.fetchAvailableTime(
-        selectedStaff.value.id,
-        selectedService.value.id,
-        selectedDate.value
-      )
+      let slots: AltegScheduleSlot[] = []
+
+      // Если выбран "Любой мастер" (id === 0), загружаем слоты всех мастеров
+      if (selectedStaff.value.id === 0) {
+        slots = await altegService.fetchAvailableTimeAllStaff(
+          primaryService.id,
+          selectedDate.value
+        )
+      } else {
+        // Иначе загружаем слоты конкретного мастера
+        slots = await altegService.fetchAvailableTime(
+          selectedStaff.value.id,
+          primaryService.id,
+          selectedDate.value
+        )
+      }
 
       // Filter out past time slots if the selected date is today
       const today = new Date().toISOString().split('T')[0]
@@ -151,23 +166,31 @@ export const useBookingStore = defineStore('booking', () => {
   }
 
   async function createBooking() {
-    if (!selectedService.value || !selectedTime.value || !clientInfo.value) {
+    if (selectedServices.value.length === 0 || !selectedTime.value || !clientInfo.value) {
       return false
     }
 
     isLoading.value = true
     error.value = null
 
-    const staffId = selectedStaff.value?.id
+    // Если выбран "Любой мастер", берем ID мастера из выбранного слота
+    let staffId = selectedStaff.value?.id
+    if (staffId === 0 && selectedTime.value.staff_id) {
+      staffId = Number(selectedTime.value.staff_id)
+    }
 
     if (!staffId) {
-      error.value = 'Не выбран мастер'
+      error.value = 'Не удалось определить мастера'
       return false
     }
 
     try {
+      const primaryService = selectedServices.value[0]
+      const serviceIds = selectedServices.value.map(s => s.id)
+
       const result = await altegService.createBooking({
-        service_id: selectedService.value.id,
+        service_id: primaryService.id,
+        service_ids: serviceIds,
         staff_id: staffId,
         datetime: selectedTime.value.datetime,
         notify_by_sms: notifyBySms.value || undefined, // Send only if set
@@ -175,32 +198,34 @@ export const useBookingStore = defineStore('booking', () => {
       })
 
       // Сформировать ответ для отображения (приводим к типу AltegBookingResponse)
-      // Сформировать ответ для отображения (приводим к типу AltegBookingResponse)
       // result is already the unwraped data from altegService
-      // But altegService returns response.data.data. 
-      // Sometimes it might be an array or object depending on endpoint.
-      // Let's safe check. If result has property 'id', it's likely the object.
-      // If it has 'data', maybe it wasn't unwrapped correctly?
-      // Based on error, TS says result is AltegBookingResponse and it acts like it doesn't have data.
-      // Let's assume result IS the Record data or close to it.
       const recordData: any = result
 
-      // Определяем мастера (если был выбран "Любой", берем из слота)
-      const staffDefault = {
-        id: selectedTime.value.staff_id || 0,
-        name: selectedTime.value.staff_name || 'Мастер',
-        avatar_url: undefined,
-        avatar: undefined,
-        avatar_big: undefined
+      // Определяем мастера для отображения в подтверждении
+      let finalStaff = selectedStaff.value
+      // Если был "Любой мастер", нужно найти реального мастера из services.staff или по ID
+      if (!finalStaff || finalStaff.id === 0) {
+        // Попробуем найти в списке загруженных мастеров
+        const found = staff.value.find(s => s.id === staffId)
+        if (found) {
+          finalStaff = found
+        } else {
+          // Fallback
+          finalStaff = {
+            id: staffId,
+            name: selectedTime.value.staff_name || 'Мастер',
+            avatar: undefined,
+            avatar_big: undefined,
+            specialization: 'Barber'
+          }
+        }
       }
-      const staffData: AltegStaff = selectedStaff.value ? selectedStaff.value : staffDefault
 
-      // Type assertion or manual mapping to satisfy AltegBookingResponse
       const finalResult: AltegBookingResponse = {
         id: recordData.record_id || Date.now(),
         status: 'confirmed',
-        service: selectedService.value,
-        staff: staffData,
+        service: primaryService, // API response structure might differ, using primary for now
+        staff: finalStaff,
         datetime: selectedTime.value.datetime,
         client: {
           name: clientInfo.value.name,
@@ -220,16 +245,23 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
-  function selectService(service: AltegService) {
-    selectedService.value = service
+  function toggleService(service: AltegService) {
+    const index = selectedServices.value.findIndex(s => s.id === service.id)
+    if (index === -1) {
+      selectedServices.value.push(service)
+    } else {
+      selectedServices.value.splice(index, 1)
+    }
+
     // Очистить ошибку при выборе
     error.value = null
-    // Сброс последующих выборов (кроме мастера - его валидируем в loadStaff)
+    // Сброс последующих выборов
     selectedDate.value = null
     selectedTime.value = null
-    // staff.value = [] // Не очищаем список мастеров сразу, позволим loadStaff обновить его
     availableDates.value = []
     availableSlots.value = []
+    // Reset staff selection if services change
+    selectedStaff.value = null
   }
 
   function selectStaff(staffMember: AltegStaff) {
@@ -310,7 +342,7 @@ export const useBookingStore = defineStore('booking', () => {
   }) {
     // Предзаполнить данные если переданы
     if (options?.service) {
-      selectedService.value = options.service
+      selectedServices.value = [options.service]
     }
     if (options?.staff) {
       selectedStaff.value = options.staff
@@ -323,7 +355,7 @@ export const useBookingStore = defineStore('booking', () => {
     for (const step of steps) {
       switch (step) {
         case 'service':
-          if (!selectedService.value) {
+          if (selectedServices.value.length === 0) {
             currentStep.value = 'service'
             return
           }
@@ -332,7 +364,7 @@ export const useBookingStore = defineStore('booking', () => {
           if (!selectedStaff.value) {
             currentStep.value = 'staff'
             // Загрузить мастеров для выбранной услуги
-            if (selectedService.value) {
+            if (selectedServices.value.length > 0) {
               loadStaff()
             }
             return
@@ -356,7 +388,7 @@ export const useBookingStore = defineStore('booking', () => {
 
   function resetBooking() {
     currentStep.value = 'service'
-    selectedService.value = null
+    selectedServices.value = []
     selectedStaff.value = null
     selectedDate.value = null
     selectedTime.value = null
@@ -376,7 +408,7 @@ export const useBookingStore = defineStore('booking', () => {
   return {
     // State
     currentStep,
-    selectedService,
+    selectedServices,
     selectedStaff,
     selectedDate,
     selectedTime,
@@ -402,7 +434,7 @@ export const useBookingStore = defineStore('booking', () => {
     loadStaff,
     loadAvailableSlots,
     createBooking,
-    selectService,
+    toggleService,
     selectStaff,
     selectDate,
     selectTime,

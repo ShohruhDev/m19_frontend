@@ -3,14 +3,14 @@
     <div class="flex items-center justify-between gap-4">
       <!-- Info Section -->
       <div class="flex-1 min-w-0">
-        <div v-if="selectedService" class="flex flex-col">
+        <div v-if="selectedServices.length > 0" class="flex flex-col">
           <div class="text-sm text-foreground font-medium truncate">
-            {{ selectedService.title }}
+            {{ selectedServices.length }} {{ getServicesCountText(selectedServices.length) }}
           </div>
           <div class="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{{ formatPrice(selectedService.price_min) }}</span>
+            <span>{{ formatPrice(totalPrice) }}</span>
             <span class="w-1 h-1 rounded-full bg-border"></span>
-            <span>{{ formatDuration(getServiceDuration(selectedService)) }}</span>
+            <span>{{ formatDuration(estimatedDuration) }}</span>
           </div>
         </div>
         <div v-else class="text-sm text-muted-foreground">
@@ -49,6 +49,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useBookingStore } from '@/stores'
+import { useBookingFlow } from '@/composables'
 import { storeToRefs } from 'pinia'
 import { Button } from '@/components/ui/button'
 
@@ -58,10 +59,11 @@ defineEmits<{
 }>()
 
 const bookingStore = useBookingStore()
-const { selectedService, currentStep, canGoNext, canGoBack } = storeToRefs(bookingStore)
+const { selectedServices, currentStep, canGoNext, canGoBack } = storeToRefs(bookingStore)
+const { totalPrice, estimatedDuration } = useBookingFlow()
 
 const nextButtonText = computed(() => {
-  if (!selectedService.value) return 'Далее'
+  if (selectedServices.value.length === 0) return 'Далее'
   switch (currentStep.value) {
     case 'service': return 'Выбрать мастера'
     case 'staff': return 'Выбрать время'
@@ -70,9 +72,10 @@ const nextButtonText = computed(() => {
   }
 })
 
-const getServiceDuration = (service: any) => {
-  // seance_length is in seconds, get from first staff member
-  return service?.staff?.[0]?.seance_length || 0
+const getServicesCountText = (count: number) => {
+  if (count === 1) return 'услуга'
+  if (count >= 2 && count <= 4) return 'услуги'
+  return 'услуг'
 }
 
 const formatPrice = (price: number) => {

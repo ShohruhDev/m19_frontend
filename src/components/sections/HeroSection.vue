@@ -9,7 +9,7 @@
         playsinline
         class="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover"
       >
-        <source src="/barbershop-hero-optimized.mp4" type="video/mp4" />
+        <source src="/barbershop-hero-v2.mp4" type="video/mp4" />
       </video>
       <!-- Dark overlay for text readability -->
       <div class="absolute inset-0 bg-black/60"></div>
@@ -37,7 +37,7 @@
           ref="titleRef"
           class="text-display-xl font-display font-bold text-white leading-none opacity-0"
         >
-          <span class="text-gradient">Премиум-уход:</span>
+          <span class="text-gradient">Профессиональный уход:</span>
           стрижка, борода, чистка
         </h1>
 
@@ -46,7 +46,7 @@
           ref="subtitleRef"
           class="text-xl md:text-2xl text-white/70 font-sans max-w-2xl mx-auto opacity-0"
         >
-          Премиум барбершоп в центре Ташкента с рейтингом 5.0 ⭐
+          Современный барбершоп в центре Ташкента с рейтингом 5.0 ⭐
         </p>
 
         <!-- CTA Buttons -->

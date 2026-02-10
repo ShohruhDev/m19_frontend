@@ -104,7 +104,7 @@
                     :key="slot.datetime"
                     :variant="selectedTime?.datetime === slot.datetime ? 'default' : 'outline'"
                     size="sm"
-                    class="font-medium transition-all duration-200 hover:scale-105 h-11"
+                    class="font-medium transition-all duration-200 hover:scale-105 h-10 rounded-full"
                     :class="{
                       'shadow-md shadow-primary/20': selectedTime?.datetime === slot.datetime,
                       'hover:border-primary hover:bg-primary/5': selectedTime?.datetime !== slot.datetime
@@ -126,19 +126,9 @@
               </svg>
             </div>
             <div class="space-y-2">
-              <p class="text-sm font-medium text-foreground">Нет доступного времени</p>
-              <p class="text-xs text-muted-foreground">на {{ formatDate(selectedDate) }}</p>
+              <p class="text-sm font-medium text-foreground">На эту дату нет свободных мест</p>
+              <p class="text-xs text-muted-foreground">Попробуйте выбрать другой день или мастера</p>
             </div>
-            <Button 
-              variant="link" 
-              class="text-primary hover:text-primary/80 font-medium" 
-              @click="findNearestDate"
-            >
-              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Найти ближайшую свободную дату
-            </Button>
           </div>
         </div>
 
@@ -235,13 +225,6 @@ const selectTime = (slot: AltegScheduleSlot) => {
   selectTimeAction(slot)
 }
 
-const findNearestDate = () => {
-  // For now, just set to today and try to load
-  // In a more advanced implementation, we could query the API for the next available date
-  const today = new Date().toISOString().split('T')[0]
-  selectDateAction(today)
-}
-
 const retryLoadSlots = () => {
   if (selectedDate.value) {
     loadAvailableSlots()
@@ -310,6 +293,9 @@ onMounted(() => {
   if (!selectedDate.value) {
     const today = new Date().toISOString().split('T')[0]
     selectDateAction(today)
+  } else {
+    // Reload slots if returning to this step with a date already selected
+    loadAvailableSlots()
   }
 })
 </script>

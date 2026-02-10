@@ -121,12 +121,28 @@ class AltegIntegrationService {
           },
         }
       )
-      // Backend returns { success: true, data: [...slots], timestamp: ... }
-      // So we access response.data directly, not response.data.data
-      const slots = response.data || []
-      return Array.isArray(slots) ? slots.filter((slot: any) => slot.available) : []
-    } catch (error) {
+      // Backend (now fixed) returns { success: true, data: [...] }
+      // The data array contains slots with { available: true }
+      const rawData = response.data
+      let slots: any[] = []
+
+      if (Array.isArray(rawData)) {
+        slots = rawData
+      } else if (rawData && Array.isArray(rawData.data)) {
+        slots = rawData.data
+      } else {
+        slots = []
+      }
+
+      return slots
+    } catch (error: any) {
       console.error('Error fetching available time:', error)
+
+      // Handle Altegio 403 or specific errors
+      if (error.message && (error.message.includes('403') || error.message.includes('Not enough rights'))) {
+        throw new Error('Онлайн-запись к этому мастеру временно недоступна. Пожалуйста, выберите другого мастера или позвоните нам.')
+      }
+
       throw new Error('Не удалось загрузить доступное время')
     }
   }

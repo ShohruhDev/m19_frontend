@@ -10,9 +10,9 @@
           </h1>
         </div>
       
-        <div class="booking-container bg-card rounded-xl border border-border overflow-hidden flex flex-col h-[600px]">
-          <!-- Embed BookingFlow directly -->
-          <BookingFlowModal :is-open="true" @close="$router.push('/')" />
+        <div class="booking-container bg-card rounded-xl border border-border overflow-hidden flex flex-col h-[600px] sm:h-[calc(100vh-14rem)] min-h-[500px]">
+          <!-- Embed AltegioWidget directly -->
+          <AltegioWidget />
         </div>
       </div>
     </main>
@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import AppHeader from '@/components/common/AppHeader.vue'
-import BookingFlowModal from '@/components/booking/BookingFlow.vue'
+import AltegioWidget from '@/components/booking/AltegioWidget.vue'
 import { useHead } from '@unhead/vue'
 
 useHead({

@@ -67,26 +67,25 @@
                     rel="noopener noreferrer"
                     class="flex items-center gap-2 px-4 py-2 bg-gold-500/10 border border-gold-500/30 text-gold-500 rounded-lg hover:bg-gold-500 hover:text-dark transition-all"
                   >
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
-                    </svg>
+                    <Instagram class="w-5 h-5" />
                     Instagram
+                  </a>
+                  <a
+                    :href="BARBERSHOP_INFO.social.telegram"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition-all"
+                  >
+                    <Send class="w-5 h-5" />
+                    Telegram
                   </a>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- CTA -->
-          <BaseButton
-            variant="primary"
-            size="lg"
-            class="w-full"
-            @click="openBooking"
-          >
-            Записаться онлайн
-          </BaseButton>
         </div>
+
+
 
         <!-- Map -->
         <div class="card-premium p-4 h-[600px]">
@@ -108,14 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import { Instagram, Send } from 'lucide-vue-next'
 import { BARBERSHOP_INFO } from '@/data/m19-data'
-
-const appStore = useAppStore()
-
-const openBooking = () => {
-  appStore.openBookingModal()
-}
 </script>
 

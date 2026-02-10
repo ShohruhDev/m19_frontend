@@ -40,11 +40,11 @@
               <SelectableCard
                 v-for="service in category.services"
                 :key="service.id"
-                :is-selected="selectedService?.id === service.id"
-                @click="selectService(service)"
+                :is-selected="isServiceSelected(service)"
+                @click="toggleService(service)"
                 class="p-4"
               >
-                <div class="flex justify-between items-start gap-4" :class="{ 'pr-12': selectedService?.id === service.id }">
+                <div class="flex justify-between items-start gap-4" :class="{ 'pr-12': isServiceSelected(service) }">
                   <div class="flex-1 min-w-0">
                     <h4 class="font-heading font-medium text-foreground mb-1 truncate">
                       {{ service.title }}
@@ -62,7 +62,15 @@
                     </div>
                   </div>
                   
-                  <div class="text-right shrink-0">
+                  <div class="text-right shrink-0 flex flex-col items-end gap-2">
+                    <!-- Checkbox for selection state -->
+                    <div 
+                      class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200"
+                      :class="isServiceSelected(service) ? 'bg-primary border-primary' : 'border-muted-foreground/30'"
+                    >
+                      <Check v-if="isServiceSelected(service)" class="w-4 h-4 text-primary-foreground" />
+                    </div>
+
                     <div class="font-bold text-primary text-lg">
                       {{ formatPrice(service.price_min) }}
                     </div>
@@ -87,16 +95,16 @@ import SelectableCard from '@/components/ui/SelectableCard.vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, Check } from 'lucide-vue-next'
 import type { AltegService, AltegServiceCategory } from '@/types'
 
 const {
   services,
-  selectedService,
+  selectedServices,
   isLoading,
   error,
   loadServices,
-  selectService: selectServiceAction,
+  toggleService,
 } = useBookingFlow()
 
 // State for collapsibles
@@ -168,8 +176,8 @@ const categories = computed(() => {
   return mappedCategories
 })
 
-const selectService = (service: AltegService) => {
-  selectServiceAction(service)
+const isServiceSelected = (service: AltegService) => {
+  return selectedServices.value.some(s => s.id === service.id)
 }
 
 // Helper to get service duration from staff array
