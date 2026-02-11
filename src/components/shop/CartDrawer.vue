@@ -213,7 +213,7 @@
   
   const isValidOrder = computed(() => {
     // Check for full mask length (+998 AA BBB CC DD -> 17 chars)
-    return clientName.value.trim().length > 2 && clientPhone.value.length === 19
+    return clientName.value.trim().length > 2 && clientPhone.value.length === 17
   })
   
   const formatPrice = (price: number) => {
