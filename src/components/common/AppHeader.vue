@@ -47,7 +47,7 @@
           <!-- Cart Button -->
           <button 
             @click="appStore.openCart()"
-            class="cursor-pointer hidden md:flex relative p-2 text-white/80 hover:text-gold-500 transition-colors mr-2"
+            class="cursor-pointer flex relative p-2 text-white/80 hover:text-gold-500 transition-colors mr-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />

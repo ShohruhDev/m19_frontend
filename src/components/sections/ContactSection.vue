@@ -10,15 +10,15 @@
         </p>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-12">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
         <!-- Contact Info -->
-        <div class="space-y-8">
+        <div class="space-y-6 lg:space-y-8 order-2 lg:order-1">
           <!-- Address -->
-          <div class="card-premium p-8">
+          <div class="card-premium p-6 lg:p-8">
             <div class="flex items-start gap-4">
-              <div class="text-4xl">📍</div>
+              <div class="text-3xl lg:text-4xl">📍</div>
               <div>
-                <h3 class="text-xl font-heading font-bold text-white mb-2">Адрес</h3>
+                <h3 class="text-lg lg:text-xl font-heading font-bold text-white mb-2">Адрес</h3>
                 <p class="text-white/70">{{ BARBERSHOP_INFO.address.full }}</p>
                 <p class="text-gold-500 text-sm mt-2">{{ BARBERSHOP_INFO.address.metro }}</p>
               </div>
@@ -26,14 +26,14 @@
           </div>
 
           <!-- Phone -->
-          <div class="card-premium p-8">
+          <div class="card-premium p-6 lg:p-8">
             <div class="flex items-start gap-4">
-              <div class="text-4xl">📞</div>
+              <div class="text-3xl lg:text-4xl">📞</div>
               <div class="flex-1">
-                <h3 class="text-xl font-heading font-bold text-white mb-2">Телефон</h3>
+                <h3 class="text-lg lg:text-xl font-heading font-bold text-white mb-2">Телефон</h3>
                 <a
                   :href="BARBERSHOP_INFO.contact.phoneLink"
-                  class="text-2xl font-bold text-gold-500 hover:text-gold-400 transition-colors"
+                  class="text-xl lg:text-2xl font-bold text-gold-500 hover:text-gold-400 transition-colors"
                 >
                   {{ BARBERSHOP_INFO.contact.phoneDisplay }}
                 </a>
@@ -43,11 +43,11 @@
           </div>
 
           <!-- Working Hours -->
-          <div class="card-premium p-8">
+          <div class="card-premium p-6 lg:p-8">
             <div class="flex items-start gap-4">
-              <div class="text-4xl">⏰</div>
+              <div class="text-3xl lg:text-4xl">⏰</div>
               <div>
-                <h3 class="text-xl font-heading font-bold text-white mb-2">Режим работы</h3>
+                <h3 class="text-lg lg:text-xl font-heading font-bold text-white mb-2">Режим работы</h3>
                 <p class="text-white/70">{{ BARBERSHOP_INFO.workingHours.display }}</p>
                 <p class="text-gold-500 text-sm mt-2">Работаем без выходных</p>
               </div>
@@ -55,12 +55,12 @@
           </div>
 
           <!-- Social -->
-          <div class="card-premium p-8">
+          <div class="card-premium p-6 lg:p-8">
             <div class="flex items-start gap-4">
-              <div class="text-4xl">💬</div>
+              <div class="text-3xl lg:text-4xl">💬</div>
               <div class="flex-1">
-                <h3 class="text-xl font-heading font-bold text-white mb-4">Социальные сети</h3>
-                <div class="flex gap-4">
+                <h3 class="text-lg lg:text-xl font-heading font-bold text-white mb-4">Социальные сети</h3>
+                <div class="flex flex-wrap gap-4">
                   <a
                     :href="BARBERSHOP_INFO.social.instagram"
                     target="_blank"
@@ -85,11 +85,9 @@
           </div>
         </div>
 
-
-
         <!-- Map -->
-        <div class="card-premium p-4 h-[600px]">
-          <div class="w-full h-full rounded-lg overflow-hidden">
+        <div class="card-premium p-2 lg:p-4 h-[400px] lg:h-[600px] order-1 lg:order-2">
+          <div class="w-full h-full rounded-lg overflow-hidden bg-dark-50">
             <!-- Yandex Maps Embed -->
             <iframe
               :src="`https://yandex.uz/map-widget/v1/?ll=${BARBERSHOP_INFO.address.coordinates.lng}%2C${BARBERSHOP_INFO.address.coordinates.lat}&z=16&l=map&pt=${BARBERSHOP_INFO.address.coordinates.lng},${BARBERSHOP_INFO.address.coordinates.lat},pm2rdm`"
@@ -98,6 +96,7 @@
               frameborder="0"
               allowfullscreen
               style="position:relative;"
+              class="w-full h-full"
             ></iframe>
           </div>
         </div>
