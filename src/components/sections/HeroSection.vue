@@ -31,22 +31,30 @@
 
     <!-- Content -->
     <div class="container-custom relative z-10">
-      <div class="max-w-4xl mx-auto text-center space-y-8">
+      <div class="max-w-4xl mx-auto text-center space-y-6">
         <!-- Main title -->
         <h1
           ref="titleRef"
-          class="text-4xl md:text-5xl font-display font-bold text-white leading-tight opacity-0"
+          class="opacity-0 space-y-3"
         >
-          <span class="text-gradient">ПРЕОБРАЖЕНИЕ</span>
-          <br />–20% СКИДКА НА ПЕРВОЕ ПОСЕЩЕНИЕ
+          <!-- Top line -->
+          <span class="block hero-top-line">
+            ПРИДИТЕ С ФЛАЕРОМ
+          </span>
+
+          <!-- Big discount line with brush -->
+          <span class="block hero-discount-row">
+            <span class="hero-percent">-20%</span>
+            <span class="hero-brush-badge">СКИДКА</span>
+          </span>
         </h1>
 
         <!-- Subtitle -->
         <p
           ref="subtitleRef"
-          class="text-xl md:text-2xl text-white/70 font-sans max-w-2xl mx-auto opacity-0"
+          class="text-base md:text-lg text-white/60 font-sans max-w-xl mx-auto opacity-0 uppercase tracking-widest"
         >
-          Современный барбершоп в центре Ташкента с рейтингом 5.0 ⭐
+          Один из лучших барбершопов в центре Ташкента с рейтингом 5.0 ⭐
         </p>
 
         <!-- CTA Buttons -->
@@ -187,5 +195,72 @@ const openBooking = () => {
 
 .duration-2000 {
   transition-duration: 2000ms;
+}
+
+/* ── Hero top line ── */
+.hero-top-line {
+  font-family: var(--font-family-heading);
+  font-size: clamp(0.85rem, 3vw, 1.15rem);
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* ── Discount row ── */
+.hero-discount-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-percent {
+  font-family: var(--font-family-heading);
+  font-size: clamp(4rem, 16vw, 9rem);
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-shadow:
+    0 0 60px rgba(255,255,255,0.15),
+    2px 2px 0 rgba(0,0,0,0.5);
+}
+
+/* ── Brush badge ── */
+.hero-brush-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-heading);
+  font-size: clamp(1.8rem, 7vw, 4.5rem);
+  font-weight: 900;
+  color: #111;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 8px 28px 12px;
+  z-index: 1;
+}
+
+.hero-brush-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  clip-path: polygon(
+    0% 15%,
+    3% 0%,
+    97% 5%,
+    100% 20%,
+    98% 80%,
+    100% 100%,
+    2% 95%,
+    0% 80%
+  );
+  z-index: -1;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
 }
 </style>
