@@ -14,7 +14,12 @@
         <!-- Contact Info -->
         <div class="space-y-6 lg:space-y-8 order-2 lg:order-1">
           <!-- Address -->
-          <div class="card-premium p-6 lg:p-8">
+          <a
+            href="https://yandex.uz/maps/?text=M19+Barbershop+%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82+%D0%90%D0%B2%D0%BB%D0%B8%D1%91-%D0%9E%D1%82%D0%B0+36"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card-premium p-6 lg:p-8 block hover:border-gold-500/60 transition-colors cursor-pointer"
+          >
             <div class="flex items-start gap-4">
               <div class="text-3xl lg:text-4xl">📍</div>
               <div>
@@ -23,7 +28,7 @@
                 <p class="text-gold-500 text-sm mt-2">{{ BARBERSHOP_INFO.address.metro }}</p>
               </div>
             </div>
-          </div>
+          </a>
 
           <!-- Phone -->
           <div class="card-premium p-6 lg:p-8">

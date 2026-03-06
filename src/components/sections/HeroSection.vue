@@ -35,10 +35,10 @@
         <!-- Main title -->
         <h1
           ref="titleRef"
-          class="text-display-xl font-display font-bold text-white leading-none opacity-0"
+          class="text-4xl md:text-5xl font-display font-bold text-white leading-tight opacity-0"
         >
-          <span class="text-gradient">Профессиональный уход:</span>
-          стрижка, борода, чистка
+          <span class="text-gradient">ПРЕОБРАЖЕНИЕ</span>
+          <br />–20% СКИДКА НА ПЕРВОЕ ПОСЕЩЕНИЕ
         </h1>
 
         <!-- Subtitle -->
