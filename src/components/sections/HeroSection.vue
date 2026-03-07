@@ -39,7 +39,7 @@
         >
           <!-- Top line -->
           <span class="block hero-top-line">
-            ПРИДИТЕ С ФЛАЕРОМ
+            НА ПЕРВЫЙ ВИЗИТ
           </span>
 
           <!-- Big discount line with brush -->
@@ -219,7 +219,7 @@ const openBooking = () => {
 
 .hero-percent {
   font-family: var(--font-family-heading);
-  font-size: clamp(4rem, 16vw, 9rem);
+  font-size: clamp(2.5rem, 10vw, 6rem);
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
@@ -236,7 +236,7 @@ const openBooking = () => {
   align-items: center;
   justify-content: center;
   font-family: var(--font-family-heading);
-  font-size: clamp(1.8rem, 7vw, 4.5rem);
+  font-size: clamp(1.2rem, 5vw, 3rem);
   font-weight: 900;
   color: #111;
   letter-spacing: 0.04em;
