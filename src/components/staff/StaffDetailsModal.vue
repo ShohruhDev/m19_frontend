@@ -1,8 +1,12 @@
 <template>
   <Dialog :open="isOpen" @update:open="$emit('update:isOpen', $event)">
-    <DialogContent class="max-w-2xl max-h-[90vh] p-0 overflow-hidden bg-dark border-gold-500/30 flex flex-col gap-0">
-      <DialogHeader class="p-6 pb-2 shrink-0 bg-dark z-10">
+    <DialogContent class="max-w-2xl max-h-[90vh] p-0 overflow-hidden bg-dark border-gold-500/30 flex flex-col gap-0" :show-close-button="false">
+      <DialogHeader class="p-6 pb-2 shrink-0 bg-dark z-10 flex flex-row items-center justify-between">
         <DialogTitle class="text-2xl font-heading text-gradient">Информация о мастере</DialogTitle>
+        <DialogClose class="text-white/40 hover:text-white transition-colors rounded-md p-1 hover:bg-white/10">
+          <X class="w-5 h-5" />
+          <span class="sr-only">Закрыть</span>
+        </DialogClose>
       </DialogHeader>
 
       <div 
@@ -81,7 +85,8 @@
 
 <script setup lang="ts">
 import { watch, onUnmounted } from 'vue'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
+import { X } from 'lucide-vue-next'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import type { AltegStaff } from '@/types'
 
