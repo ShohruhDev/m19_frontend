@@ -155,6 +155,7 @@ const navItems = [
   { name: 'Главная', path: '/' },
   { name: 'Услуги', path: '/#services' },
   { name: 'Мастера', path: '/#masters' },
+  { name: 'Галерея', path: '/gallery' },
   { name: 'Косметика', path: '/products' },
 ]
 

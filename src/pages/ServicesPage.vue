@@ -22,33 +22,28 @@
         </div>
 
         <div v-else class="space-y-6">
-          <Collapsible
-            v-for="(category, index) in categories"
-            :key="category.id"
-            v-model:open="isOpenState[index]"
-            class="group/collapsible"
-          >
+          <Collapsible v-model:open="isOpen" class="group/collapsible">
             <CollapsibleTrigger class="w-full flex items-center justify-between p-6 bg-dark-50 border border-white/10 rounded-lg hover:border-gold-500/50 hover:bg-white/5 transition-all duration-300 cursor-pointer text-left">
               <h2 class="text-2xl font-heading font-bold text-white group-hover/collapsible:text-gold-500 transition-colors">
-                {{ category.title }}
+                Услуги
               </h2>
-              <ChevronDown 
-                class="w-6 h-6 text-gold-500 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" 
+              <ChevronDown
+                class="w-6 h-6 text-gold-500 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180"
               />
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent>
               <div class="pt-4 grid gap-4">
                 <div
-                  v-for="service in category.services"
+                  v-for="service in allServices"
                   :key="service.id"
                   class="card-premium p-4 md:p-6 flex flex-col md:flex-row gap-6 group hover:translate-x-1 transition-transform"
                 >
                   <!-- Service Image -->
                   <div class="w-full md:w-32 h-32 md:h-24 shrink-0 rounded-lg overflow-hidden bg-dark-100 border border-white/10 relative">
-                     <img 
-                       v-if="service.image_url" 
-                       :src="service.image_url" 
+                     <img
+                       v-if="service.image_url"
+                       :src="service.image_url"
                        :alt="service.title"
                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                        @error="(e: any) => e.target.style.display = 'none'"
@@ -66,15 +61,25 @@
                       </h3>
                       <p class="text-white/70 text-sm mb-3 max-w-xl">{{ service.description }}</p>
                       <div class="flex items-center gap-4 text-sm text-white/50">
-                        <span class="flex items-center gap-1">
+                        <span v-if="getServiceDuration(service)" class="flex items-center gap-1">
                           <Clock class="w-4 h-4" />
                           {{ formatDuration(getServiceDuration(service)) }}
                         </span>
+                        <span v-if="service.discount && service.discount > 0" class="text-gold-500 font-semibold">
+                          −{{ service.discount }}% скидка
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-4 mt-2 md:mt-0">
-                      <div class="text-2xl font-bold text-gold-500 whitespace-nowrap">{{ formatPrice(service.price_min) }}</div>
+                      <div>
+                        <div class="text-2xl font-bold text-gold-500 whitespace-nowrap">
+                          {{ service.price_min === service.price_max ? formatPrice(service.price_min) : 'от ' + formatPrice(service.price_min) }}
+                        </div>
+                        <div v-if="service.price_min !== service.price_max" class="text-xs text-white/40 text-right">
+                          до {{ formatPrice(service.price_max) }}
+                        </div>
+                      </div>
                       <BaseButton
                         variant="secondary"
                         size="sm"
@@ -106,79 +111,25 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown, Clock, Scissors } from 'lucide-vue-next'
 import { altegService } from '@/services'
-import type { AltegServiceCategory, AltegService } from '@/types'
+import type { AltegService } from '@/types'
 
 const isBookingOpen = ref(false)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
-const categories = ref<AltegServiceCategory[]>([])
-// State for collapsibles - array of booleans matching categories length
-const isOpenState = ref<boolean[]>([])
+const allServices = ref<AltegService[]>([])
+const isOpen = ref(true)
 
-const fetchCategories = async () => {
+const fetchServices = async () => {
   isLoading.value = true
   error.value = null
   try {
-    const allServices = await altegService.fetchServices()
-    
-    // Group services by category_id
-    const groupedServices: Record<number, AltegService[]> = {}
-    allServices.forEach(service => {
-      const catId = service.category_id || 0
-      if (!groupedServices[catId]) {
-        groupedServices[catId] = []
-      }
-      groupedServices[catId].push(service)
-    })
-
-    // Map groups to categories with titles based on heuristics
-    const mappedCategories: AltegServiceCategory[] = []
-    
-    const getCategoryTitle = (services: AltegService[]): string => {
-      const hitSales = services.find(s => s.title.includes('ХИТ ПРОДАЖ'))
-      if (hitSales) {
-        if (hitSales.price_min > 480000) return 'Индивидуальное обслуживание в VIP Room'
-        if (hitSales.price_min > 400000) return 'Профессиональный барбер в общем зале'
-      }
-      const haircut = services.find(s => s.title.includes('Классическая стрижка'))
-      if (haircut) {
-         if (haircut.price_min > 200000) return 'Индивидуальное обслуживание в VIP Room'
-         return 'Профессиональный барбер в общем зале'
-      }
-      return 'Услуги'
-    }
-
-    Object.entries(groupedServices).forEach(([idStr, services]) => {
-      const id = parseInt(idStr)
-      if (services.length > 0) {
-        const title = getCategoryTitle(services)
-        
-        // Check if category with this title already exists
-        const existingCategory = mappedCategories.find(c => c.title === title)
-        
-        if (existingCategory) {
-          // Merge services into existing category
-          existingCategory.services.push(...services)
-        } else {
-          mappedCategories.push({
-            id,
-            title,
-            services
-          })
-        }
-      }
-    })
-
-    mappedCategories.sort((a, b) => {
-      if (a.title.includes('VIP')) return 1
-      if (b.title.includes('VIP')) return -1
-      return 0
-    })
-
-    categories.value = mappedCategories
-    // Close all categories by default
-    isOpenState.value = mappedCategories.map(() => false)
-    
+    const services = await altegService.fetchServices()
+    allServices.value = services
+      .filter(s => s.active !== 0)
+      .map(s => ({
+        ...s,
+        image_url: s.image_group?.images?.basic?.path || s.image_url || undefined
+      }))
   } catch (err) {
     console.error('Failed to load services:', err)
     error.value = 'Не удалось загрузить список услуг'
@@ -219,7 +170,7 @@ const formatDuration = (seconds: number) => {
 }
 
 onMounted(() => {
-  fetchCategories()
+  fetchServices()
 })
 </script>
 

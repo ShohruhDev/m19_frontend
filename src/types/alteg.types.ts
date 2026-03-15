@@ -6,9 +6,12 @@
 export interface AltegService {
   id: number | string
   title: string
+  booking_title?: string
   description?: string
   price_min: number
   price_max: number
+  discount?: number        // % discount, 0 = none
+  active?: number          // 1 = active, 0 = inactive
   duration: number // в минутах (обычно 0, не используется)
   category_id?: number
   image_url?: string

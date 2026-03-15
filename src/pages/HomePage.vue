@@ -7,91 +7,99 @@
 
 
 
-      <!-- Services Preview Section -->
+      <!-- Services Carousel Section -->
       <section id="services" class="section-padding bg-dark">
         <div class="container-custom">
-          <div class="text-center mb-16" data-scroll>
-            <h2 class="text-display-md font-heading font-bold text-white mb-4">
-              Наши услуги
-            </h2>
-            <p class="text-xl text-white/70 max-w-2xl mx-auto">
-              Профессиональный уход и стиль для современного мужчины
-            </p>
+          <!-- Header -->
+          <div class="flex items-end justify-between mb-10">
+            <div>
+              <h2 class="text-display-md font-heading font-bold text-white mb-2">Наши услуги</h2>
+              <p class="text-white/50 text-base">Профессиональный уход и стиль для современного мужчины</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 ml-6">
+              <button class="services-prev w-10 h-10 rounded-full border border-white/20 text-white flex items-center justify-center hover:border-gold-500 hover:text-gold-500 transition-all duration-200">
+                <ChevronLeft class="w-4 h-4" />
+              </button>
+              <button class="services-next w-10 h-10 rounded-full border border-white/20 text-white flex items-center justify-center hover:border-gold-500 hover:text-gold-500 transition-all duration-200">
+                <ChevronRight class="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
+          <!-- Loading -->
           <div v-if="isLoading" class="flex justify-center py-12">
-             <div class="w-12 h-12 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+            <div class="w-12 h-12 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
 
-          <div v-else class="space-y-6">
-            <Collapsible
-              v-for="(category, index) in categories"
-              :key="category.id"
-              v-model:open="isOpenState[index]"
-              class="group/collapsible"
-            >
-              <CollapsibleTrigger class="w-full flex items-center justify-between p-6 bg-dark-50 border border-white/10 rounded-lg hover:border-gold-500/50 hover:bg-white/5 transition-all duration-300 cursor-pointer text-left">
-                <h2 class="text-2xl font-heading font-bold text-white group-hover/collapsible:text-gold-500 transition-colors">
-                  {{ category.title }}
-                </h2>
-                <ChevronDown 
-                  class="w-6 h-6 text-gold-500 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" 
-                />
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <div class="pt-4 grid gap-4">
-                  <div
-                    v-for="service in category.services"
-                    :key="service.id"
-                    class="card-premium p-4 md:p-6 flex flex-col md:flex-row gap-6 group hover:translate-x-1 transition-transform"
-                  >
-                    <!-- Service Image -->
-                    <div class="w-full md:w-32 h-32 md:h-24 shrink-0 rounded-lg overflow-hidden bg-dark-100 border border-white/10 relative">
-                       <img 
-                         v-if="service.image_url" 
-                         :src="service.image_url" 
-                         :alt="service.title"
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                         @error="(e: any) => e.target.style.display = 'none'"
-                       />
-                       <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-100 to-dark-200">
-                          <Scissors class="w-8 h-8 text-white/20" />
-                       </div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                      <div class="flex-1">
-                        <h3 class="text-xl font-heading font-semibold text-white mb-2 group-hover:text-gold-500 transition-colors">
-                          {{ service.title }}
-                        </h3>
-                        <p class="text-white/70 text-sm mb-3 max-w-xl">{{ service.description }}</p>
-                        <div class="flex items-center gap-4 text-sm text-white/50">
-                          <span class="flex items-center gap-1">
-                            <Clock class="w-4 h-4" />
-                            {{ formatDuration(getServiceDuration(service)) }}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-4 mt-2 md:mt-0">
-                        <div class="text-2xl font-bold text-gold-500 whitespace-nowrap">{{ formatPrice(service.price_min) }}</div>
-                        <BaseButton
-                          variant="secondary"
-                          size="sm"
-                          class="w-full md:w-auto"
-                          @click="bookService(service)"
-                        >
-                          Записаться
-                        </BaseButton>
-                      </div>
-                    </div>
+          <!-- Swiper -->
+          <Swiper
+            v-else
+            :modules="swiperModules"
+            :space-between="20"
+            :loop="true"
+            :centered-slides="true"
+            :autoplay="{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }"
+            :navigation="{ prevEl: '.services-prev', nextEl: '.services-next' }"
+            :grab-cursor="true"
+            :breakpoints="{
+              0:    { slidesPerView: 1.15 },
+              480:  { slidesPerView: 2 },
+              768:  { slidesPerView: 3 },
+              1024: { slidesPerView: 4 },
+            }"
+          >
+            <SwiperSlide v-for="service in allServices" :key="service.id">
+              <div class="card-premium overflow-hidden group flex flex-col cursor-pointer h-full">
+                <!-- Image -->
+                <div class="relative w-full overflow-hidden" style="aspect-ratio: 3/2;">
+                  <img
+                    v-if="service.image_url"
+                    :src="service.image_url"
+                    :alt="service.title"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    @error="(e: any) => e.target.style.display = 'none'"
+                  />
+                  <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-100 to-dark-200">
+                    <Scissors class="w-10 h-10 text-white/10" />
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-dark-50/70 via-transparent to-transparent"></div>
+                  <div v-if="service.discount && service.discount > 0" class="absolute top-3 left-3 bg-gold-500 text-dark text-xs font-bold px-2.5 py-1 rounded-full">
+                    −{{ service.discount }}%
                   </div>
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
+
+                <!-- Content -->
+                <div class="p-4 flex flex-col flex-1 gap-3">
+                  <div class="flex-1">
+                    <h3 class="text-sm font-heading font-semibold text-white group-hover:text-gold-500 transition-colors leading-snug mb-1.5">
+                      {{ service.title }}
+                    </h3>
+                    <div v-if="getServiceDuration(service)" class="flex items-center gap-1 text-xs text-white/35">
+                      <Clock class="w-3 h-3" />
+                      {{ formatDuration(getServiceDuration(service)) }}
+                    </div>
+                  </div>
+
+                  <div class="flex items-end justify-between gap-2 pt-2.5 border-t border-white/10">
+                    <div>
+                      <div class="text-base font-bold text-gold-500 leading-none">
+                        {{ service.price_min === service.price_max ? formatPrice(service.price_min) : 'от ' + formatPrice(service.price_min) }}
+                      </div>
+                      <div v-if="service.price_min !== service.price_max" class="text-xs text-white/30 mt-0.5">
+                        до {{ formatPrice(service.price_max) }}
+                      </div>
+                    </div>
+                    <button
+                      class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md border border-gold-500/50 text-gold-500 hover:bg-gold-500 hover:text-dark transition-all duration-200"
+                      @click.stop="bookService(service)"
+                    >
+                      Записаться
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+          </Swiper>
         </div>
       </section>
 
@@ -195,7 +203,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Autoplay, Navigation } from 'swiper/modules'
+import 'swiper/css'
 import { useBookingFlow } from '@/composables'
 import { useAppStore } from '@/stores'
 import AppHeader from '@/components/common/AppHeader.vue'
@@ -205,20 +216,20 @@ import ContactSection from '@/components/sections/ContactSection.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import StaffDetailsModal from '@/components/staff/StaffDetailsModal.vue'
 import BookingFlowModal from '@/components/booking/BookingFlow.vue'
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { ChevronDown, Clock, Scissors } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Clock, Scissors } from 'lucide-vue-next'
 
 import { altegService } from '@/services'
-import type { AltegStaff, AltegService, AltegServiceCategory } from '@/types'
+import type { AltegStaff, AltegService } from '@/types'
 
 const appStore = useAppStore()
 const { initializeBooking } = useBookingFlow()
 
 const isBookingOpen = ref(false)
 const isLoading = ref(true)
-const categories = ref<AltegServiceCategory[]>([])
-const isOpenState = ref<boolean[]>([])
+const allServices = ref<AltegService[]>([])
 const staffMembers = ref<any[]>([])
+
+const swiperModules = [Autoplay, Navigation]
 const isStaffModalOpen = ref(false)
 const selectedStaff = ref<any>(null)
 
@@ -245,74 +256,15 @@ const openStaffModal = (master: any) => {
   isStaffModalOpen.value = true
 }
 
-const fetchCategories = async () => {
+const fetchServices = async () => {
   try {
-    const allServices = await altegService.fetchServices()
-    
-    // Group services by category_id
-    const groupedServices: Record<number, AltegService[]> = {}
-    allServices.forEach(service => {
-      const catId = service.category_id || 0
-      if (!groupedServices[catId]) {
-        groupedServices[catId] = []
-      }
-      groupedServices[catId].push(service)
-    })
-
-    // Map groups to categories with titles based on heuristics
-    const mappedCategories: AltegServiceCategory[] = []
-    
-    const getCategoryTitle = (services: AltegService[]): string => {
-      const hitSales = services.find(s => s.title.includes('ХИТ ПРОДАЖ'))
-      if (hitSales) {
-        if (hitSales.price_min > 480000) return 'Индивидуальное обслуживание в VIP Room'
-        if (hitSales.price_min > 400000) return 'Профессиональный барбер в общем зале'
-      }
-      const haircut = services.find(s => s.title.includes('Классическая стрижка'))
-      if (haircut) {
-         if (haircut.price_min > 200000) return 'Индивидуальное обслуживание в VIP Room'
-         return 'Профессиональный барбер в общем зале'
-      }
-      return 'Услуги'
-    }
-
-    Object.entries(groupedServices).forEach(([idStr, services]) => {
-      const id = parseInt(idStr)
-      if (services.length > 0) {
-        const title = getCategoryTitle(services)
-        
-        // Check if category with this title already exists
-        const existingCategory = mappedCategories.find(c => c.title === title)
-        
-        if (existingCategory) {
-          // Merge services into existing category
-          existingCategory.services.push(...services.map(s => ({
-            ...s,
-            image_url: s.image_group?.images?.basic?.path || s.image_url || undefined
-          })))
-        } else {
-          mappedCategories.push({
-            id,
-            title,
-            services: services.map(s => ({
-              ...s,
-              image_url: s.image_group?.images?.basic?.path || s.image_url || undefined
-            }))
-          })
-        }
-      }
-    })
-
-    mappedCategories.sort((a, b) => {
-      if (a.title.includes('VIP')) return 1
-      if (b.title.includes('VIP')) return -1
-      return 0
-    })
-
-    categories.value = mappedCategories
-    // Close all categories by default
-    isOpenState.value = mappedCategories.map(() => false)
-    
+    const services = await altegService.fetchServices()
+    allServices.value = services
+      .filter(s => s.active !== 0)
+      .map(s => ({
+        ...s,
+        image_url: s.image_group?.images?.basic?.path || s.image_url || undefined
+      }))
   } catch (err) {
     console.error('Failed to load services:', err)
   }
@@ -429,10 +381,22 @@ useHead({
 onMounted(async () => {
   isLoading.value = true
   await Promise.all([
-    fetchCategories(),
+    fetchServices(),
     fetchStaff()
   ])
   isLoading.value = false
 })
+
+onUnmounted(() => {})
 </script>
+
+<style scoped>
+/* Make all Swiper slides equal height (stretch to tallest card) */
+:deep(.swiper-wrapper) {
+  align-items: stretch;
+}
+:deep(.swiper-slide) {
+  height: auto;
+}
+</style>
 

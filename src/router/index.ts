@@ -28,6 +28,22 @@ const router = createRouter({
         title: 'Онлайн-запись - M19 Barbershop',
       },
     },
+    {
+      path: '/gallery',
+      name: 'gallery',
+      component: () => import('@/pages/GalleryPage.vue'),
+      meta: {
+        title: 'Галерея - M19 Barbershop',
+      },
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('@/pages/AdminPage.vue'),
+      meta: {
+        title: 'Админ - M19 Barbershop',
+      },
+    },
   ],
   scrollBehavior(to, _from, savedPosition) {
     if (savedPosition) {
